@@ -1,5 +1,5 @@
 import { createStore, combineReducers, Action } from 'redux'
-
+import route, { RouteState, RouteActions } from './modules/route'
 export default createStore(
   combineReducers({
     route
@@ -7,7 +7,7 @@ export default createStore(
 )
 
 export type ReduxState = {
-  counter: RouteState
+  route: RouteState
 }
 
 export type ReduxAction = RouteActions | Action
