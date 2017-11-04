@@ -1,47 +1,52 @@
 import { Action } from 'redux'
 
 enum ActionNames {
-  INC = 'counter/increment',
-  DEC = 'counter/decrement'
+  SOURCE = 'counter/source',
+  DESTINATION = 'counter/decrement'
 }
 
-interface IncrementAction extends Action {
-  type: ActionNames.INC
-  plusAmount: number
+interface SourceAction extends Action {
+  type: ActionNames.SOURCE
+  station: string
 }
-export const incrementAmount = (amount: number): IncrementAction => ({
-  type: ActionNames.INC,
-  plusAmount: amount
+export const setSourceStation = (station: string): SourceAction => ({
+  type: ActionNames.SOURCE,
+  station: station
 })
 
-interface DecrementAction extends Action {
-  type: ActionNames.DEC
-  minusAmount: number
+interface DestinationAction extends Action {
+  type: ActionNames.DESTINATION
+  station: string
 }
 
-export const decrementAmount = (amount: number): DecrementAction => ({
-  type: ActionNames.DEC,
-  minusAmount: amount
+export const setDestinationStation = (station: string): DestinationAction => ({
+  type: ActionNames.DESTINATION,
+  station: station
 })
 
 export interface CounterState {
-  num: number
+  source: string,
+  destination: string
 }
 
-export type CounterActions = IncrementAction | DecrementAction
+export type CounterActions = SourceAction | DestinationAction
 
-const initialState: CounterState = { num: 0 }
+const initialState: CounterState = { source: '此方', destination: '彼方' }
 
 export default function reducer(
   state: CounterState = initialState,
   action: CounterActions
 ): CounterState {
+  const copyState = Object.assign({}, state)
   switch (action.type) {
-    case ActionNames.INC:
-      return { num: state.num + action.plusAmount }
-    case ActionNames.DEC:
-      return { num: state.num - action.minusAmount }
+    case ActionNames.SOURCE:
+      copyState.source = action.station
+      break
+    case ActionNames.DESTINATION:
+      copyState.destination = action.station
+      break
     default:
-      return state
+      
   }
+  return copyState
 }

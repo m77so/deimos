@@ -1,18 +1,18 @@
 import { Counter } from './Counter'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
-import { decrementAmount, incrementAmount } from './module'
+import { setDestinationStation, setSourceStation } from './module'
 import { ReduxAction, ReduxState } from '../store'
 
 export class ActionDispatcher {
   constructor(private dispatch: (action: ReduxAction) => void) {}
 
-  public increment(amount: number) {
-    this.dispatch(incrementAmount(amount))
+  public setSource(station: string) {
+    this.dispatch(setSourceStation(station))
   }
 
-  public decrement(amount: number) {
-    this.dispatch(decrementAmount(amount))
+  public setDestination(station: string) {
+    this.dispatch(setDestinationStation(station))
   }
 }
 

@@ -11,11 +11,12 @@ export class Counter extends React.Component<Props, {}> {
   render() {
     return (
       <div>
-        <p>score: {this.props.value.num}</p>
-        <button onClick={() => this.props.actions.increment(3)}>
+        <p>source: {this.props.value.source}</p>
+        <p>destination: {this.props.value.destination}</p>
+        <button onClick={() => this.props.actions.setSource('hoge')}>
           Increment 3
         </button>
-        <button onClick={() => this.props.actions.decrement(2)}>
+        <button onClick={() => this.props.actions.setDestination('fuga')}>
           Decrement 2
         </button>
       </div>
