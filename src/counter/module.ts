@@ -24,19 +24,21 @@ export const setDestinationStation = (station: string): DestinationAction => ({
   station: station
 })
 
-export interface CounterState {
+export interface RouteState {
   source: string,
-  destination: string
+  destination: string,
+  sourceValid: boolean,
+  destinationValid: boolean
 }
 
-export type CounterActions = SourceAction | DestinationAction
+export type RouteActions = SourceAction | DestinationAction
 
-const initialState: CounterState = { source: '此方', destination: '彼方' }
+const initialState: RouteState = { source: '此方', destination: '彼方', sourceValid: false, destinationValid: false }
 
 export default function reducer(
-  state: CounterState = initialState,
-  action: CounterActions
-): CounterState {
+  state: RouteState = initialState,
+  action: RouteActions
+): RouteState {
   const copyState = Object.assign({}, state)
   switch (action.type) {
     case ActionNames.SOURCE:

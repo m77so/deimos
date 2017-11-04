@@ -1,4 +1,4 @@
-import counter, { CounterActions, CounterState } from './counter/module'
+import counter, { RouteActions, RouteState } from './counter/module'
 import { createStore, combineReducers, Action } from 'redux'
 
 export default createStore(
@@ -8,7 +8,7 @@ export default createStore(
 )
 
 export type ReduxState = {
-  counter: CounterState
+  counter: RouteState
 }
 
-export type ReduxAction = CounterActions | Action
+export type ReduxAction = RouteActions | Action
