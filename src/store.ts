@@ -1,13 +1,15 @@
-import { createStore, combineReducers, Action } from 'redux'
-import route, { RouteState, RouteActions } from './modules/route'
+
+import counter, {CounterActions, CounterState} from './counter/module'
+import {createStore, combineReducers, Action} from 'redux'
+
 export default createStore(
   combineReducers({
-    route
+    counter
   })
 )
 
 export type ReduxState = {
-  route: RouteState
+  counter : CounterState
 }
 
-export type ReduxAction = RouteActions | Action
+export type ReduxAction = CounterActions | Action

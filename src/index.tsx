@@ -1,15 +1,12 @@
 import * as React from 'react'
-import { render } from 'react-dom'
-import { createStore } from 'redux'
-import { Provider } from 'react-redux'
-import App from './App'
+import * as ReactDOM from 'react-dom'
+import Counter from './counter/Container'
+import store from './store'
+import {Provider} from 'react-redux'
 
-let store = createStore(todoApp)
-
-let rootElement = document.getElementById('root')
-render(
+ReactDOM.render(
   <Provider store={store}>
-    <App />
-  </Provider>,
-  rootElement
+    <Counter />
+  </Provider>
+  , document.getElementById('root')
 )
