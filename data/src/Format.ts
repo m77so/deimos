@@ -1,35 +1,9 @@
 import * as fs from 'fs'
 import * as iconv from 'iconv-lite'
-export interface Line{
-  id: number
-  name: string
-  kana: string
-  src: string
-  dest: string
-  stations: Array<string>
-  stationIds: Array<number>
-  kms: Array<number>
-  akms: Array<number>
-  dupLineStationIds: Array<number>
-}
-export interface Station{
-  id: number
-  name: string
-  kana: string
-  lineIds: Array<number>
-}
-export interface OutputJSON{
-  lineNames: Array<string>
-  stationNames: Array<string>
-  lines: Array<Line>
-  stations: Array<Station>
-}
+import {Line,Station,OutputJSON} from '../../src/counter/module'
 const output : OutputJSON = {lineNames:[],stationNames:[],lines:[],stations:[]}
 fs.readFile('./resource/mars_sd.dat',(err,data)=>{
   const recordsNum = data.length/28
-  let datasd: Array<any> = []
-  let stations : Map<string,string> = new Map()
-  let lines : Map<number,string> = new Map()
   for(let r=0;r<recordsNum;++r){
     const offset = 28*r
     let cur = offset
