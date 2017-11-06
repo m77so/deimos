@@ -21,12 +21,7 @@ export class Counter extends React.Component<Props, {}> {
           value={this.props.value.text}
           onChange={event => this.props.actions.changeText(event.target.value)}
         />
-        <button onClick={() => this.props.actions.setSource('hoge')}>
-          Increment 3
-        </button>
-        <button onClick={() => this.props.actions.setDestination('fuga')}>
-          Decrement 2
-        </button>
+
       </div>
     )
   }

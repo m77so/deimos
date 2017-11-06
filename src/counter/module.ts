@@ -44,7 +44,9 @@ export interface RouteState {
 
 export type RouteActions = SourceAction | DestinationAction | TextAction
 
-const initialState: RouteState = { source: '此方', destination: '彼方', sourceValid: false, destinationValid: false, text: '此方 彼方' }
+const initialState: RouteState = { 
+  source: '金沢', destination: '福井', sourceValid: false, destinationValid: false, text: '金沢 福井' 
+}
 
 export default function reducer(
   state: RouteState = initialState,
