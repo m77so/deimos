@@ -35,6 +35,7 @@ export default function reducer(
   switch (action.type) {
     case ActionNames.TEXT:
       copyState.text = action.text
+      textShori(action.text)
       const textArray = action.text.split(' ')
       if (textArray[0].length > 0 ) {
         copyState.source = textArray[0]
@@ -47,4 +48,8 @@ export default function reducer(
       
   }
   return copyState
+}
+
+function textShori(text: string) {
+  
 }
