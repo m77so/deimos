@@ -18,8 +18,8 @@ export class Counter extends React.Component<Props, {}> {
         <p>destination: {this.props.value.destination}{this.props.value.destinationValid ? '✓' : '☓'}</p>
         <input
           type="text"
-          value={this.props.value.source}
-          onChange={event => this.props.actions.setSource(event.target.value)}
+          value={this.props.value.text}
+          onChange={event => this.props.actions.changeText(event.target.value)}
         />
         <button onClick={() => this.props.actions.setSource('hoge')}>
           Increment 3

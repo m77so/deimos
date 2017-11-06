@@ -1,8 +1,9 @@
 import { Action } from 'redux'
 
 enum ActionNames {
-  SOURCE = 'counter/source',
-  DESTINATION = 'counter/decrement'
+  SOURCE = 'route/source',
+  DESTINATION = 'route/decrement',
+  TEXT = 'route/text'
 }
 
 interface SourceAction extends Action {
@@ -24,16 +25,26 @@ export const setDestinationStation = (station: string): DestinationAction => ({
   station: station
 })
 
+interface TextAction extends Action {
+  type: ActionNames.TEXT
+  text: string
+}
+
+export const changeText = (text: string): TextAction => ({
+  type: ActionNames.TEXT,
+  text: text
+})
 export interface RouteState {
   source: string,
   destination: string,
   sourceValid: boolean,
-  destinationValid: boolean
+  destinationValid: boolean,
+  text: string
 }
 
-export type RouteActions = SourceAction | DestinationAction
+export type RouteActions = SourceAction | DestinationAction | TextAction
 
-const initialState: RouteState = { source: '此方', destination: '彼方', sourceValid: false, destinationValid: false }
+const initialState: RouteState = { source: '此方', destination: '彼方', sourceValid: false, destinationValid: false, text: '此方 彼方' }
 
 export default function reducer(
   state: RouteState = initialState,
@@ -46,6 +57,16 @@ export default function reducer(
       break
     case ActionNames.DESTINATION:
       copyState.destination = action.station
+      break
+    case ActionNames.TEXT:
+      copyState.text = action.text
+      const textArray = action.text.split(' ')
+      if (textArray[0].length > 0 ) {
+        copyState.source = textArray[0]
+      }
+      if (textArray.length > 1 ) {
+        copyState.destination = textArray[1]
+      }
       break
     default:
       
