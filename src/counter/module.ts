@@ -20,7 +20,8 @@ export interface RouteState {
   destinationValid: boolean
   text: string
   completionStation: string[]
-  completionLine: string[]
+  completionLine: string[],
+  via: string[]
 }
 
 export type RouteActions = TextAction
@@ -31,7 +32,7 @@ const initialState: RouteState = {
   sourceValid: false,
   destinationValid: false,
   text: '',
-
+  via: [],
   completionLine: [],
   completionStation: []
 }
@@ -52,6 +53,7 @@ export default function reducer(
       )
       copyState.completionLine = res.next.lines
       copyState.completionStation = res.next.stations
+      copyState.via = res.route.map(e=>e.value.name)
       if (stations.length > 0) {
         copyState.source = stations[0].value.name
       }

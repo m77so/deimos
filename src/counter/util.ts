@@ -74,6 +74,7 @@ export const textFunction = (
     stations: data.stationNames,
     lines: data.lineNames
   }
+  
   let route: RouteNode[] = []
   for (let i = 0; i < words.length; ++i) {
     const word = words[i]

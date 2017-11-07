@@ -15,7 +15,9 @@ export class Counter extends React.Component<Props, {}> {
           source: {this.props.value.source}
           {this.props.value.sourceValid ? '✓' : '☓'}
         </p>
-
+        <p>
+          via: {this.props.value.via.join(',')}
+        </p>
         <p>
           destination: {this.props.value.destination}
           {this.props.value.destinationValid ? '✓' : '☓'}
