@@ -13,9 +13,25 @@ export enum RouteNodeType {
   LINE,
   DUPLICATED
 }
-export interface RouteNode {
+export interface TextRouteNode {
   type: RouteNodeType
   value: Line | Station
+}
+enum Direction {
+  UP,
+  DOWN
+}
+interface RouteEdge {
+  line: Line
+  direction: Direction
+  startKm: number
+  endKm: number
+  start: Station
+  end: Station
+}
+interface Route {
+  stations: Station[]
+  edges: RouteEdge[]
 }
 const nextPopsLine = (lineIndex: number): NextPops => {
   const rail = data.lines[lineIndex]
@@ -56,11 +72,8 @@ const unique = function() {
     return !(element in seen) && (seen[element] = 1)
   }
 }
-interface TextFunctionResponse {
-  route: RouteNode[]
-  next: NextPops
-}
-export const textFunction = (state: RouteState, text: string): TextFunctionResponse => {
+
+export const textFunction = (state: RouteState, text: string): RouteState => {
   const words = text
     .replace(/^\s+|\s+$/g, '')
     .replace(/\s+/g, ' ')
@@ -70,41 +83,56 @@ export const textFunction = (state: RouteState, text: string): TextFunctionRespo
     lines: data.lineNames
   }
 
-  let route: RouteNode[] = []
+  let textRoute: TextRouteNode[] = []
+  let route: Route = {
+    stations: [],
+    edges: []
+  }
   let sourceStation: Station | null = null
   for (let i = 0; i < words.length; ++i) {
-    const word = words[i]
+    let word = words[i]
+    const suffix = word.slice(-1) || ''
+    if ('SsＳｓLlＬｌ'.indexOf(suffix) > -1) {
+      word = word.slice(0, -1)
+    }
     const stationFlag = next.stations.includes(word)
     const lineFlag = next.lines.includes(word)
     const stationIndex = stationFlag ? data.stationNames.indexOf(word) : -1
-    const lineIndex = lineFlag ? data.lineNames.indexOf(words[i]) : -1
-    const type: RouteNodeType | null = stationFlag
+    const lineIndex = lineFlag ? data.lineNames.indexOf(word) : -1
+    let type: RouteNodeType | null = stationFlag
       ? lineFlag ? RouteNodeType.DUPLICATED : RouteNodeType.STATION
       : lineFlag ? RouteNodeType.LINE : null
-    if (sourceStation === null) {
-      if (route.length === 0) {
-        if (type === RouteNodeType.LINE) {
+    if (type === RouteNodeType.DUPLICATED) {
+      type =
+        'SsＳｓ'.indexOf(suffix) > -1 ? RouteNodeType.STATION : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
+    }
+    if (sourceStation === null && type !== null) {
+      if (textRoute.length === 0) {
+        if (type === RouteNodeType.STATION) {
           sourceStation = data.stations[stationIndex]
         }
       } else {
-        if (route[0].type === RouteNodeType.LINE) {
+        if (textRoute[0].type === RouteNodeType.LINE) {
           sourceStation = data.stations[stationIndex]
         } else if (type === RouteNodeType.STATION) {
-          route[0].type = RouteNodeType.LINE
+          textRoute[0].type = RouteNodeType.LINE
           sourceStation = data.stations[stationIndex]
-        } else if (type === RouteNodeType.LINE) {
-          route[0].type = RouteNodeType.STATION
-          sourceStation = data.stations[route[0].value.id] // route[0].value で取れるのにinterfaceが邪魔
+        } else if (type === RouteNodeType.LINE || type === RouteNodeType.DUPLICATED) {
+          textRoute[0].type = RouteNodeType.STATION
+          sourceStation = data.stations[textRoute[0].value.id] // route[0].value で取れるのにinterfaceが邪魔
         }
+      }
+      if (sourceStation !== null) {
+        route.stations[0] = sourceStation
       }
     }
     if ((stationFlag || lineFlag) && !(stationFlag && lineFlag)) {
-      route.push({
+      textRoute.push({
         type: stationFlag ? RouteNodeType.STATION : RouteNodeType.LINE,
         value: stationFlag ? data.stations[stationIndex] : data.lines[lineIndex]
       })
     } else if (stationFlag && lineFlag) {
-      route.push({
+      textRoute.push({
         type: RouteNodeType.DUPLICATED,
         value: data.stations[stationIndex]
       })
@@ -127,6 +155,10 @@ export const textFunction = (state: RouteState, text: string): TextFunctionRespo
       }
     }
   }
-
-  return { next: next, route: route }
+  state.completionLine = next.lines
+  state.completionStation = next.stations
+  state.via = textRoute.map(e => e.value.name)
+  state.source = sourceStation !== null ? sourceStation.name : ''
+  state.text = text
+  return state
 }
