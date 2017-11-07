@@ -31,10 +31,10 @@ export class Counter extends React.Component<Props, {}> {
           ほかん
           <ul>
             {this.props.value.completionLine.map(str => {
-              return <li key={'l' + str}>{str}</li>
+              return <li key={'l' + str}>LINE:{str}</li>
             })}
             {this.props.value.completionStation.map(str => {
-              return <li key={'l' + str}>{str}</li>
+              return <li key={'s' + str}>{str}</li>
             })}
           </ul>
         </div>
