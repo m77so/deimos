@@ -1,6 +1,5 @@
 import { Action } from 'redux'
-import { data } from './data'
-
+import { textFunction, RouteNodeType } from './util'
 enum ActionNames {
   TEXT = 'route/text'
 }
@@ -20,42 +19,47 @@ export interface RouteState {
   sourceValid: boolean
   destinationValid: boolean
   text: string
+  completionStation: string[]
+  completionLine: string[]
 }
 
 export type RouteActions = TextAction
 
 const initialState: RouteState = {
-  source: '金沢',
-  destination: '福井',
+  source: '',
+  destination: '',
   sourceValid: false,
   destinationValid: false,
-  text: '金沢 福井'
+  text: '',
+
+  completionLine: [],
+  completionStation: []
 }
 
-export default function reducer(state: RouteState = initialState, action: RouteActions): RouteState {
+export default function reducer(
+  state: RouteState = initialState,
+  action: RouteActions
+): RouteState {
   const copyState = Object.assign({}, state)
   switch (action.type) {
     case ActionNames.TEXT:
       copyState.text = action.text
-
-      const textArray = action.text.split(' ')
-      if (textArray[0].length > 0) {
-        copyState.source = textArray[0] + data.lineNames[0]
+      const res = textFunction(state, action.text)
+      const stations = res.route.filter(
+        e =>
+          e.type === RouteNodeType.STATION ||
+          e.type === RouteNodeType.DUPLICATED
+      )
+      copyState.completionLine = res.next.lines
+      copyState.completionStation = res.next.stations
+      if (stations.length > 0) {
+        copyState.source = stations[0].value.name
       }
-      if (textArray.length > 1) {
-        copyState.destination = textArray[1]
+      if (stations.length > 1) {
+        copyState.destination = stations[stations.length - 1].value.name
       }
-
       break
     default:
   }
   return copyState
 }
-
-// function textFunction(state: RouteState, text: string) {
-//   const words = text
-//     .replace(/^\s+|\s+$/g, '')
-//     .replace(/ +/g, ' ')
-//     .split(' ')
-//   return words
-// }
