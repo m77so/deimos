@@ -94,7 +94,6 @@ fs.readFile('./resource/mars_sd.dat', (err, data) => {
             line.src = stations[0];
             line.dest = stations[stations.length - 1];
         }
-        output.lines[0] = { 'id': 0, 'name': '', 'kana': '', 'stations': [''], 'stationIds': [-1], 'kms': [0], 'akms': [0], 'dupLineStationIds': [-1], 'src': '', 'dest': '' };
         console.log(JSON.stringify(output));
     });
 });

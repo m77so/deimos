@@ -1,6 +1,29 @@
 import * as fs from 'fs'
 import * as iconv from 'iconv-lite'
-import {  OutputJSON } from '../../src/counter/module'
+export interface Line {
+  id: number
+  name: string
+  kana: string
+  src: string
+  dest: string
+  stations: Array<string>
+  stationIds: Array<number>
+  kms: Array<number>
+  akms: Array<number>
+  dupLineStationIds: Array<number>
+}
+export interface Station {
+  id: number
+  name: string
+  kana: string
+  lineIds: Array<number>
+}
+export interface OutputJSON {
+  lineNames: Array<string>
+  stationNames: Array<string>
+  lines: Array<Line>
+  stations: Array<Station>
+}
 const output: OutputJSON = {
   lineNames: [],
   stationNames: [],
@@ -14,7 +37,7 @@ fs.readFile('./resource/mars_sd.dat', (err, data) => {
     let cur = offset
     let record: Array<any> = []
     record.push(data.readUInt8(cur++))
-    record.push(data.readUInt16LE(cur++))
+    record.push(data.readInt16LE(cur++))
     cur++
     record.push(data.readUInt8(cur++))
     record.push(
@@ -43,9 +66,10 @@ fs.readFile('./resource/mars_sd.dat', (err, data) => {
         const id = output.stationNames.indexOf(record[3])
         output.stations[id].lineIds.push(record[0])
         const lineIds = output.stations[id].lineIds
-        for (let line of lineIds) {
-          !output.lines[line].dupLineStationIds.includes(id) &&
-            output.lines[line].dupLineStationIds.push(id)
+        for (let lineId of lineIds) {
+          if (!output.lines[lineId].dupLineStationIds.includes(id)) {
+            output.lines[lineId].dupLineStationIds.push(id)
+          }
         }
       } else {
         const nextId = output.stations.length
@@ -73,13 +97,13 @@ fs.readFile('./resource/mars_sd.dat', (err, data) => {
       const offset = 8 * r
       let cur = offset
       let record: Array<any> = []
-      record.push(data.readUInt16LE(cur))
+      record.push(data.readInt16LE(cur))
       cur += 2
-      record.push(data.readUInt16LE(cur))
+      record.push(data.readInt16LE(cur))
       cur += 2
-      record.push(data.readUInt16LE(cur))
+      record.push(data.readInt16LE(cur))
       cur += 2
-      record.push(data.readUInt16LE(cur))
+      record.push(data.readInt16LE(cur))
       const id = output.lines[record[0]].kms.indexOf(record[1])
       output.lines[record[0]].akms[id] = record[2]
     }
@@ -97,7 +121,9 @@ fs.readFile('./resource/mars_sd.dat', (err, data) => {
       line.akms = akms
       line.src = stations[0]
       line.dest = stations[stations.length - 1]
+      
     }
+    output.lines[0] = {'id':0,'name':'','kana':'','stations':[''],'stationIds':[-1],'kms':[0],'akms':[0],'dupLineStationIds':[-1],'src':'','dest':''}
     console.log(JSON.stringify(output))
   })
 })

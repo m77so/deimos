@@ -130,7 +130,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
   let textRoute: TextRouteNode[] = []
   let route: Route = new Route()
   let sourceStation: Station | null = null
-  const specialSuffix = 'SsＳｓLlＬｌ'
+  const specialSuffix = 'SsＳｓ駅LlＬｌ'
   for (let i = 0; i < words.length; ++i) {
     let word = words[i]
     if (word === '' || specialSuffix.indexOf(word) > -1) {
@@ -149,7 +149,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
       : lineFlag ? RouteNodeType.LINE : null
     if (type === RouteNodeType.DUPLICATED) {
       type =
-        'SsＳｓ'.indexOf(suffix) > -1
+        'SsＳｓ駅'.indexOf(suffix) > -1
           ? RouteNodeType.STATION
           : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
     }
@@ -212,8 +212,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
       }
       // 駅　路線　駅
       // 駅　駅
-      // 駅　路線　路線
-      console.log(route.stations)
+      // 駅　路線　路線 ←未対応
       if (route.stations.length >= 2) {
         if (textRoute[textRoute.length - 2].type === RouteNodeType.LINE) {
           // 駅　路線　駅　となる場合
@@ -240,6 +239,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
         } else if (
           textRoute[textRoute.length - 2].type === RouteNodeType.STATION
         ) {
+          // 駅　駅　となる場合
           const startStationId = route.stations[route.stations.length - 2].id
           const endStationId = route.stations[route.stations.length - 1].id
           const start = data.stations[startStationId]
@@ -269,7 +269,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
       const nextFromStation = nextPopsStation(stationIndex, route)
       const nextFromLine = nextPopsLine(lineIndex, route)
       next.lines =
-        sourceStation === null || type === RouteNodeType.DUPLICATED
+        sourceStation !== null || type === RouteNodeType.DUPLICATED
           ? nextFromStation.lines.concat(nextFromLine.lines).filter(unique())
           : []
       next.stations = nextFromStation.stations
@@ -291,10 +291,25 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
       }
     }
   }
+  state.duplicatedKomaru=false
+  for (let n of textRoute) {
+    if (n.type === RouteNodeType.DUPLICATED) {
+      state.duplicatedKomaru = true
+      break
+    }
+  }
   state.completionLine = next.lines
   state.completionStation = next.stations
-  state.via = textRoute.map(e => e.value.name)
+  state.via = []
+  for (let i = 0; i < route.edges.length; ++i) {
+    state.via.push('路線:' + route.edges[i].line.name)
+    state.via.push('駅:' + route.stations[i + 1].name)
+  }
   state.source = sourceStation !== null ? sourceStation.name : ''
+  state.destination =
+    route.stations.length > 1
+      ? route.stations[route.stations.length - 1].name
+      : ''
   state.text = text
   return state
 }

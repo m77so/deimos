@@ -20,7 +20,8 @@ export interface RouteState {
   destinationValid: boolean
   text: string
   completionStation: string[]
-  completionLine: string[],
+  completionLine: string[]
+  duplicatedKomaru: boolean
   via: string[]
 }
 
@@ -33,6 +34,7 @@ const initialState: RouteState = {
   destinationValid: false,
   text: '',
   via: [],
+  duplicatedKomaru: false,
   completionLine: [],
   completionStation: []
 }

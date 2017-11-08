@@ -27,13 +27,16 @@ export class Counter extends React.Component<Props, {}> {
           value={this.props.value.text}
           onChange={event => this.props.actions.changeText(event.target.value)}
         />
+        { 
+        (this.props.value.duplicatedKomaru)?
+          <div>路線名と駅名で同じ名前のやつがあると判定するのがめんどくさいので，駅なら末尾にsか駅，路線なら末尾にlをつけてください．そのうち頑張って実装します．</div> : ''}
         <div>
           ほかん
           <ul>
             {this.props.value.completionLine.slice(0,30).map(str => {
               return <li key={'l' + str}>LINE:{str}</li>
             })}
-            {this.props.value.completionStation.slice(0,30).map(str => {
+            {this.props.value.completionStation.slice(0,300).map(str => {
               return <li key={'s' + str}>{str}</li>
             })}
           </ul>
