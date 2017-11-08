@@ -1,5 +1,5 @@
 import { Action } from 'redux'
-import { textFunction } from './util'
+import { textFunction, Route } from './route'
 enum ActionNames {
   TEXT = 'route/text'
 }
@@ -22,7 +22,8 @@ export interface RouteState {
   completionStation: string[]
   completionLine: string[]
   duplicatedKomaru: boolean
-  via: string[]
+  via: string[],
+  route: Route
 }
 
 export type RouteActions = TextAction
@@ -36,7 +37,8 @@ const initialState: RouteState = {
   via: [],
   duplicatedKomaru: false,
   completionLine: [],
-  completionStation: []
+  completionStation: [],
+  route: new Route()
 }
 
 export default function reducer(

@@ -31,7 +31,7 @@ interface RouteEdge {
   start: Station
   end: Station
 }
-class Route {
+export class Route {
   stations: Station[]
   edges: RouteEdge[]
   constructor() {
@@ -291,7 +291,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
       }
     }
   }
-  state.duplicatedKomaru=false
+  state.duplicatedKomaru = false
   for (let n of textRoute) {
     if (n.type === RouteNodeType.DUPLICATED) {
       state.duplicatedKomaru = true
@@ -310,6 +310,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
     route.stations.length > 1
       ? route.stations[route.stations.length - 1].name
       : ''
+  state.route = route
   state.text = text
   return state
 }
