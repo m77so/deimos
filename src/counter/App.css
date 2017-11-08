@@ -1,0 +1,22 @@
+.hoge div{
+  display: inline-block
+}
+.station{
+  padding-top: 1em;
+  padding-bottom: 1em;
+  padding-left: .75em;
+  padding-right: .75em;
+  border: 1px solid black;
+  border-radius: 1em;
+}
+.rail{
+  padding: -.25em;
+  padding-left: 1em;
+  padding-right: 1em;
+  border-top: 2px dashed #222;
+  border-bottom: 2px dashed #222;
+}
+#textBox{
+  width: 50em;
+  font-size: 1.5em;
+}
