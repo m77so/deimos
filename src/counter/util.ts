@@ -67,7 +67,8 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
     return nullNextPops
   }
   const srcStation = route.stations[route.stations.length - 1]
-  const ngStations = route.ngStations(lineIndex, srcStation.id)
+  const ngStations =
+    srcStation !== undefined ? route.ngStations(lineIndex, srcStation.id) : []
   const stations = rail.stations
   let lineTemp = {}
   rail.dupLineStationIds
@@ -103,7 +104,7 @@ const nextPopsStation = (stationId: number, route: Route): NextPops => {
 
   const lines = station.lineIds.map(id => data.lineNames[id])
 
-  const stations = Object.keys(stationTemp).map(id=>data.stationNames[id])
+  const stations = Object.keys(stationTemp).map(id => data.stationNames[id])
   return {
     stations: stations,
     lines: lines
@@ -129,13 +130,14 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
   let textRoute: TextRouteNode[] = []
   let route: Route = new Route()
   let sourceStation: Station | null = null
+  const specialSuffix = 'SsＳｓLlＬｌ'
   for (let i = 0; i < words.length; ++i) {
     let word = words[i]
-    if (word === '') {
+    if (word === '' || specialSuffix.indexOf(word) > -1) {
       break
     }
     const suffix = word.slice(-1) || ''
-    if ('SsＳｓLlＬｌ'.indexOf(suffix) > -1) {
+    if (specialSuffix.indexOf(suffix) > -1) {
       word = word.slice(0, -1)
     }
     const stationFlag = next.stations.includes(word)
@@ -263,6 +265,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
     }
 
     if (stationFlag || lineFlag) {
+      console.log(stationFlag, lineFlag, stationIndex, lineIndex, words, route)
       const nextFromStation = nextPopsStation(stationIndex, route)
       const nextFromLine = nextPopsLine(lineIndex, route)
       next.lines =
