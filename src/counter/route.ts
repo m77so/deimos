@@ -69,7 +69,7 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
   const srcStation = route.stations[route.stations.length - 1]
   const ngStations =
     srcStation !== undefined ? route.ngStations(lineIndex, srcStation.id) : []
-  const stations = rail.stations
+  const stations = rail.stationIds.filter(id => !ngStations.includes(id)).map(id=>data.stationNames[id])
   let lineTemp = {}
   rail.dupLineStationIds
     .filter(id => !ngStations.includes(id))
