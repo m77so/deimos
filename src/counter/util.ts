@@ -126,17 +126,36 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
         route.stations[0] = sourceStation
       }
     }
-    if ((stationFlag || lineFlag) && !(stationFlag && lineFlag)) {
+
+    if (type === RouteNodeType.STATION) {
       textRoute.push({
-        type: stationFlag ? RouteNodeType.STATION : RouteNodeType.LINE,
-        value: stationFlag ? data.stations[stationIndex] : data.lines[lineIndex]
+        type: RouteNodeType.STATION,
+        value: data.stations[stationIndex]
       })
-    } else if (stationFlag && lineFlag) {
+    } else if (type === RouteNodeType.LINE) {
+      textRoute.push({
+        type: RouteNodeType.LINE,
+        value: data.lines[lineIndex]
+      })
+    } else if (type === RouteNodeType.DUPLICATED) {
       textRoute.push({
         type: RouteNodeType.DUPLICATED,
         value: data.stations[stationIndex]
       })
     }
+
+    if (type === RouteNodeType.STATION) {
+      route.stations.push(data.stations[stationIndex])
+      // 駅　路線　駅
+      // 駅　駅
+      // 駅　路線　路線
+      if (route.stations.length >= 2) {
+        if (textRoute[textRoute.length - 2].type === RouteNodeType.LINE) {
+          
+        }
+      }
+    }
+
     if (stationFlag || lineFlag) {
       const nextFromStation = nextPopsStation(stationIndex)
       const nextFromLine = nextPopsLine(lineIndex)
