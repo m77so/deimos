@@ -1,5 +1,6 @@
 import { Action } from 'redux'
 import { textFunction, Route } from './route'
+import {fare} from './fare'
 enum ActionNames {
   TEXT = 'route/text'
 }
@@ -23,7 +24,10 @@ export interface RouteState {
   completionLine: string[]
   duplicatedKomaru: boolean
   via: string[],
-  route: Route
+  route: Route,
+  fare: number,
+  km: number,
+  akm: number
 }
 
 export type RouteActions = TextAction
@@ -38,7 +42,10 @@ const initialState: RouteState = {
   duplicatedKomaru: false,
   completionLine: [],
   completionStation: [],
-  route: new Route()
+  route: new Route(),
+  fare: 0,
+  km: 0,
+  akm: 0
 }
 
 export default function reducer(
@@ -50,7 +57,10 @@ export default function reducer(
     case ActionNames.TEXT:
       
       copyState = textFunction(copyState, action.text)
-
+      const fareRes = fare(copyState.route)
+      copyState.akm = fareRes.akm
+      copyState.km = fareRes.km
+      copyState.fare = fareRes.fare
       break
     default:
   }

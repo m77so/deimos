@@ -22,6 +22,7 @@ export class Counter extends React.Component<Props, {}> {
           destination: {this.props.value.destination}
           {this.props.value.destinationValid ? '✓' : '☓'}
         </p>
+        <p>営業キロ：{this.props.value.km/10}キロ、運賃計算キロ：{this.props.value.akm/10}キロ、運賃：{this.props.value.fare}円</p>
         <input
           type="text"
           value={this.props.value.text}
