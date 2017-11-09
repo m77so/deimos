@@ -1,7 +1,7 @@
-.hoge div{
-  display: inline-block
-}
+/* App.css */
+
 .station{
+  display: inline-block;
   padding-top: 1em;
   padding-bottom: 1em;
   padding-left: .75em;
@@ -9,12 +9,23 @@
   border: 1px solid black;
   border-radius: 1em;
 }
+.railWrapper{
+  display: inline-block;
+  text-align: center;
+  position: relative;
+}
 .rail{
+  display: inline-block;
   padding: -.25em;
   padding-left: 1em;
   padding-right: 1em;
   border-top: 2px dashed #222;
   border-bottom: 2px dashed #222;
+}
+.comment{
+  position: absolute;
+  left: 0;
+  right: 0;
 }
 #textBox{
   width: 50em;

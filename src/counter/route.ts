@@ -23,7 +23,7 @@ enum Direction {
   UP, // 上りを表す　キロ数が減る
   DOWN
 }
-interface RouteEdge {
+export interface RouteEdge {
   line: Line
   direction: Direction
   startIndex: number

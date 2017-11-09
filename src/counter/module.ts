@@ -1,6 +1,7 @@
 import { Action } from 'redux'
-import { textFunction, Route } from './route'
-import {fare} from './fare'
+import { textFunction, Route, RouteEdge } from './route'
+import { fare } from './fare'
+export {RouteEdge}
 enum ActionNames {
   TEXT = 'route/text'
 }
