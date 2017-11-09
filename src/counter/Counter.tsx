@@ -21,7 +21,9 @@ class Rail extends React.Component<RailProps, {}> {
     )
     return (
       <div className="railWrapper">
-        <div className="rail">{this.props.edge.line.name}</div>
+        <div className={`rail ${edge.line.chiho ? 'railChiho' : ''}`}>
+          {this.props.edge.line.name}
+        </div>
         <div className="comment">{km / 10}km</div>
       </div>
     )
@@ -48,11 +50,7 @@ class RoutePreviewComponent extends React.Component<RoutePreviewProps, {}> {
         components.push(<StationComponent value={station.name} />)
       })
     }
-    return (
-      <div className="routePreview">
-        {components}
-      </div>
-    )
+    return <div className="routePreview">{components}</div>
   }
 }
 export class Counter extends React.Component<Props, {}> {

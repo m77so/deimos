@@ -22,6 +22,10 @@
   border-top: 2px dashed #222;
   border-bottom: 2px dashed #222;
 }
+.railChiho{
+  border-color: #22f;
+  background-color: rgb(140, 238, 255);
+}
 .comment{
   position: absolute;
   left: 0;
