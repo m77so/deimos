@@ -1,4 +1,4 @@
-import { Counter } from './Counter'
+import { App } from './App'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 import { changeText } from './module'
@@ -17,4 +17,4 @@ export default connect(
   (dispatch: Dispatch<ReduxAction>) => ({
     actions: new ActionDispatcher(dispatch)
   })
-)(Counter)
+)(App)

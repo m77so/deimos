@@ -1,5 +1,5 @@
 import { RouteState } from './module'
-import { data, Line, Station } from './data'
+import { data, Line, Station } from './dataInterface'
 interface NextPops {
   stations: string[]
   lines: string[]

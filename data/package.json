@@ -1,0 +1,12 @@
+{
+  "name": "deimos_data",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^8.0.50"
+  },
+  "scripts": {
+    "build": "node build/Format.js > ../deimos/src/app/data.ts"
+  }
+}

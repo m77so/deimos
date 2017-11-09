@@ -148,4 +148,7 @@ chihoLines.forEach(chihoLine => {
     }
   })
 })
-console.log(JSON.stringify(output, null, '  '))
+console.log(
+  `import {OutputJSON} from './dataInterface'
+export const data:OutputJSON = ${JSON.stringify(output, null, '  ')}`
+)

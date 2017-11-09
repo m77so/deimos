@@ -53,7 +53,7 @@ class RoutePreviewComponent extends React.Component<RoutePreviewProps, {}> {
     return <div className="routePreview">{components}</div>
   }
 }
-export class Counter extends React.Component<Props, {}> {
+export class App extends React.Component<Props, {}> {
   render() {
     return (
       <div>

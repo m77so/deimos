@@ -1,4 +1,4 @@
-import counter, { RouteActions, RouteState } from './counter/module'
+import counter, { RouteActions, RouteState } from './app/module'
 import { createStore, combineReducers, Action } from 'redux'
 
 export default createStore(
