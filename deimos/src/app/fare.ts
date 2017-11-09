@@ -1,11 +1,18 @@
 import { Route } from './route'
 
-interface FareResponse {
+export class FareResponse {
   fare: number
   km: number
   akm: number
+  calcType: calcType
+  constructor() {
+    this.fare = 0
+    this.km = 0
+    this.akm = 0
+    this.calcType = calcType.HondoKansen
+  }
 }
-enum calcType {
+export enum calcType {
   HondoKansen,
   HokkaidoKansen,
   ShikokuKansen,
@@ -29,7 +36,7 @@ const chitaiCalc = (
   }
   return fareCent
 }
-const calc = (akm: number, type: calcType): number => {
+const calc = (akm: number, type: calcType): [number, calcType] => {
   // akmは100m単位であるので、1000m単位になおす
   let km = Math.ceil(akm / 10)
   if (
@@ -148,7 +155,7 @@ const calc = (akm: number, type: calcType): number => {
     }
   }
 
-  return fareCent / 100
+  return [fareCent / 100, type]
 }
 export const fare = (route: Route): FareResponse => {
   let totalFare = 0
@@ -156,6 +163,7 @@ export const fare = (route: Route): FareResponse => {
   let totalAkm = 0
   let includeChihoFlag = false
   let onlyChihoFlag = true
+  let calcTypeUsed: calcType
   for (let i = 0; i < route.edges.length; ++i) {
     const edge = route.edges[i]
     const km = Math.abs(
@@ -171,13 +179,14 @@ export const fare = (route: Route): FareResponse => {
     onlyChihoFlag = onlyChihoFlag && edge.line.chiho
   }
   if (onlyChihoFlag) {
-    totalFare = calc(totalKm, calcType.HondoChiho)
+    [totalFare, calcTypeUsed] = calc(totalKm, calcType.HondoChiho)
   } else {
-    totalFare = calc(totalAkm, calcType.HondoKansen)
+    [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HondoKansen)
   }
   return {
     fare: totalFare,
     km: totalKm,
-    akm: totalAkm
+    akm: totalAkm,
+    calcType: calcTypeUsed
   }
 }

@@ -2,6 +2,7 @@ import * as React from 'react'
 import { RouteState, RouteEdge } from './module'
 import { ActionDispatcher } from './Container'
 import { Route } from './route'
+import { calcType, FareResponse } from './fare'
 import './App.css'
 
 interface Props {
@@ -53,15 +54,32 @@ class RoutePreviewComponent extends React.Component<RoutePreviewProps, {}> {
     return <div className="routePreview">{components}</div>
   }
 }
+interface FareProps {
+  fare: FareResponse
+}
+class FareComponent extends React.Component<FareProps, {}> {
+  render() {
+    let calcTypeJaStrings: string[] = []
+    calcTypeJaStrings[calcType.HokkaidoKansen] = '北海道・幹線'
+    calcTypeJaStrings[calcType.HondoChiho] = '本州３社・地方交通線'
+    calcTypeJaStrings[calcType.HondoKansen] = '本州３社・幹線'
+    calcTypeJaStrings[calcType.KyushuKansen] = '九州・幹線'
+    calcTypeJaStrings[calcType.ShikokuKansen] = '四国・幹線'
+    const calcTypeJa = calcTypeJaStrings[this.props.fare.calcType] || '日本語未定義'
+    return (
+      <p>
+        営業キロ：{this.props.fare.km / 10}キロ、 運賃計算キロ：{this.props.fare.akm / 10}キロ、 運賃：{this.props.fare.fare}円、 計算方式：{calcTypeJa}
+      </p>
+    )
+  }
+}
 export class App extends React.Component<Props, {}> {
   render() {
     return (
       <div>
         入力経路
         <RoutePreviewComponent route={this.props.value.route} />
-        <p>
-          営業キロ：{this.props.value.km / 10}キロ、運賃計算キロ：{this.props.value.akm / 10}キロ、運賃：{this.props.value.fare}円
-        </p>
+        <FareComponent fare={this.props.value.fare} />
         <input
           type="text"
           id="textBox"
