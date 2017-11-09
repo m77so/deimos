@@ -8,5 +8,8 @@
   },
   "scripts": {
     "build": "node build/Format.js > ../deimos/src/app/data.ts"
+  },
+  "dependencies": {
+    "iconv-lite": "^0.4.19"
   }
 }
