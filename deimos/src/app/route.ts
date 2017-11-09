@@ -1,8 +1,9 @@
 import { RouteState } from './module'
-import { data, Line, Station } from './dataInterface'
+import { Line, Station } from './dataInterface'
+import {data} from './data'
 interface NextPops {
-  stations: string[]
-  lines: string[]
+  stations: number[]
+  lines: number[]
 }
 const nullNextPops: NextPops = {
   stations: [],
@@ -52,10 +53,7 @@ export class Route {
         if (stationIndex <= e.startIndex && stationIndex <= e.endIndex) {
           return e.line.stationIds.slice(Math.min(e.startIndex, e.endIndex))
         } else {
-          return e.line.stationIds.slice(
-            0,
-            Math.max(e.startIndex, e.endIndex) + 1
-          )
+          return e.line.stationIds.slice(0, Math.max(e.startIndex, e.endIndex) + 1)
         }
       })
       .reduce((a, b) => a.concat(b), [])
@@ -67,16 +65,13 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
     return nullNextPops
   }
   const srcStation = route.stations[route.stations.length - 1]
-  const ngStations =
-    srcStation !== undefined ? route.ngStations(lineIndex, srcStation.id) : []
-  const stations = rail.stationIds.filter(id => !ngStations.includes(id)).map(id=>data.stationNames[id])
-  let lineTemp = {}
+  const ngStations = srcStation !== undefined ? route.ngStations(lineIndex, srcStation.id) : []
+  const stations = rail.stationIds.filter(id => !ngStations.includes(id))
+  let lineTemp: { [key: number]: number } = {}
   rail.dupLineStationIds
     .filter(id => !ngStations.includes(id))
-    .forEach(id =>
-      data.stations[id].lineIds.forEach(lineId => (lineTemp[lineId] = 1))
-    )
-  const lines = Object.keys(lineTemp).map(lineId => data.lineNames[+lineId])
+    .forEach(id => data.stations[id].lineIds.forEach(lineId => (lineTemp[lineId] = 1)))
+  const lines = Object.keys(lineTemp).map(id => ~~id)
   return {
     stations: stations,
     lines: lines
@@ -102,9 +97,9 @@ const nextPopsStation = (stationId: number, route: Route): NextPops => {
     })
   })
 
-  const lines = station.lineIds.map(id => data.lineNames[id])
+  const lines = station.lineIds
 
-  const stations = Object.keys(stationTemp).map(id => data.stationNames[id])
+  const stations = Object.keys(stationTemp).map(id => ~~id)
   return {
     stations: stations,
     lines: lines
@@ -112,7 +107,7 @@ const nextPopsStation = (stationId: number, route: Route): NextPops => {
 }
 const unique = function() {
   let seen = {}
-  return function(element: string) {
+  return function(element: number) {
     return !(element in seen) && (seen[element] = 1)
   }
 }
@@ -122,16 +117,25 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
     .replace(/^\s+|\s+$/g, '')
     .replace(/\s+/g, ' ')
     .split(' ')
+
   let next: NextPops = {
-    stations: data.stationNames,
-    lines: data.lineNames
+    stations: [2],
+    lines: [2]
+  }
+  for (let i = 0, l = data.stations.length; i < l; ++i) {
+    next.stations[i] = i
+  }
+  for (let i = 1, l = data.lines.length; i < l; ++i) {
+    next.lines[i - 1] = i
   }
 
   let textRoute: TextRouteNode[] = []
   let route: Route = new Route()
   let sourceStation: Station | null = null
   const specialSuffix = 'SsＳｓ駅LlＬｌ'
+  let type: RouteNodeType | null = null
   for (let i = 0; i < words.length; ++i) {
+    console.log(next)
     let word = words[i]
     if (word === '' || specialSuffix.indexOf(word) > -1) {
       break
@@ -140,18 +144,18 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
     if (specialSuffix.indexOf(suffix) > -1) {
       word = word.slice(0, -1)
     }
-    const stationFlag = next.stations.includes(word)
-    const lineFlag = next.lines.includes(word)
-    const stationIndex = stationFlag ? data.stationNames.indexOf(word) : -1
-    const lineIndex = lineFlag ? data.lineNames.indexOf(word) : -1
-    let type: RouteNodeType | null = stationFlag
+
+    const stationIndex = data.stationNames.indexOf(word)
+    const lineIndex = data.lineNames.indexOf(word)
+    const stationFlag = next.stations.includes(stationIndex)
+    const lineFlag = next.lines.includes(lineIndex)
+
+    type = stationFlag
       ? lineFlag ? RouteNodeType.DUPLICATED : RouteNodeType.STATION
       : lineFlag ? RouteNodeType.LINE : null
     if (type === RouteNodeType.DUPLICATED) {
       type =
-        'SsＳｓ駅'.indexOf(suffix) > -1
-          ? RouteNodeType.STATION
-          : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
+        'SsＳｓ駅'.indexOf(suffix) > -1 ? RouteNodeType.STATION : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
     }
     if (sourceStation === null && type !== null) {
       if (textRoute.length === 0) {
@@ -164,10 +168,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
         } else if (type === RouteNodeType.STATION) {
           textRoute[0].type = RouteNodeType.LINE
           sourceStation = data.stations[stationIndex]
-        } else if (
-          type === RouteNodeType.LINE ||
-          type === RouteNodeType.DUPLICATED
-        ) {
+        } else if (type === RouteNodeType.LINE || type === RouteNodeType.DUPLICATED) {
           textRoute[0].type = RouteNodeType.STATION
           sourceStation = data.stations[textRoute[0].value.id] // route[0].value で取れるのにinterfaceが邪魔
         }
@@ -205,8 +206,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
       route.stations.push(data.stations[stationIndex])
       while (
         route.stations.length > 1 &&
-        route.stations[route.stations.length - 1].id ===
-          route.stations[route.stations.length - 2].id
+        route.stations[route.stations.length - 1].id === route.stations[route.stations.length - 2].id
       ) {
         route.stations.pop()
       }
@@ -224,10 +224,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
           const end = data.stations[endStationId]
           const startLineStationId = line.stationIds.indexOf(startStationId)
           const endLineStationId = line.stationIds.indexOf(endStationId)
-          const direction =
-            startLineStationId > endLineStationId
-              ? Direction.UP
-              : Direction.DOWN
+          const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
           route.edges.push({
             line: line,
             start: start,
@@ -236,9 +233,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
             endIndex: endLineStationId,
             direction: direction
           })
-        } else if (
-          textRoute[textRoute.length - 2].type === RouteNodeType.STATION
-        ) {
+        } else if (textRoute[textRoute.length - 2].type === RouteNodeType.STATION) {
           // 駅　駅　となる場合
           const startStationId = route.stations[route.stations.length - 2].id
           const endStationId = route.stations[route.stations.length - 1].id
@@ -248,10 +243,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
           const line: Line = data.lines[lines[0]]
           const startLineStationId = line.stationIds.indexOf(startStationId)
           const endLineStationId = line.stationIds.indexOf(endStationId)
-          const direction =
-            startLineStationId > endLineStationId
-              ? Direction.UP
-              : Direction.DOWN
+          const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
           route.edges.push({
             line: line,
             start: start,
@@ -272,19 +264,11 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
         sourceStation !== null || type === RouteNodeType.DUPLICATED
           ? nextFromStation.lines.concat(nextFromLine.lines).filter(unique())
           : []
-      next.stations = nextFromStation.stations
-        .concat(nextFromLine.stations)
-        .filter(unique())
+      next.stations = nextFromStation.stations.concat(nextFromLine.stations).filter(unique())
     }
     if (stationFlag) {
-      for (
-        let ii = 0,
-          j = next.stations.length,
-          k = data.stationNames[stationIndex];
-        ii < j;
-        ++ii
-      ) {
-        if (next.stations[ii] === k) {
+      for (let ii = 0, j = next.stations.length; ii < j; ++ii) {
+        if (next.stations[ii] === stationIndex) {
           next.stations.splice(ii, 1)
           break
         }
@@ -298,18 +282,29 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
       break
     }
   }
-  state.completionLine = next.lines
-  state.completionStation = next.stations
+  if (type === null && words.length > 0) {
+    const word = words[words.length - 1]
+    const match = word.match(/^[\u3040-\u309F]+/)
+    if (match !== null) {
+      const prefixKana = new RegExp(`^${match[0]}`)
+      state.completionLine = next.lines
+        .filter(lineId => data.lines[lineId].kana.match(prefixKana) !== null)
+        .map(lineId => data.lineNames[lineId])
+      state.completionStation = next.stations
+        .filter(staId => data.stations[staId].kana.match(prefixKana) !== null)
+        .map(lineId => data.stationNames[lineId])
+    }
+  } else {
+    state.completionLine = next.lines.map(lineId => data.lineNames[lineId])
+    state.completionStation = next.stations.map(staId => data.stationNames[staId])
+  }
   state.via = []
   for (let i = 0; i < route.edges.length; ++i) {
     state.via.push('路線:' + route.edges[i].line.name)
     state.via.push('駅:' + route.stations[i + 1].name)
   }
   state.source = sourceStation !== null ? sourceStation.name : ''
-  state.destination =
-    route.stations.length > 1
-      ? route.stations[route.stations.length - 1].name
-      : ''
+  state.destination = route.stations.length > 1 ? route.stations[route.stations.length - 1].name : ''
   state.route = route
   state.text = text
   return state

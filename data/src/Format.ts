@@ -32,7 +32,41 @@ const output: OutputJSON = {
   stations: []
 }
 const dataSD = fs.readFileSync('./resource/mars_sd.dat')
+/**
+ * 半角カタカナを全角ひらがなに変換
+ * https://qiita.com/hrdaya/items/291276a5a20971592216
+ * @param {String} str 変換したい文字列
+ */
+const hankana2zenkana = function (str: string) {
+  const kanaMap: {[key: string] :string} = {
+      'ｶﾞ': 'が', 'ｷﾞ': 'ぎ', 'ｸﾞ': 'ぐ', 'ｹﾞ': 'げ', 'ｺﾞ': 'ご',
+      'ｻﾞ': 'ざ', 'ｼﾞ': 'じ', 'ｽﾞ': 'ず', 'ｾﾞ': 'ぜ', 'ｿﾞ': 'ぞ',
+      'ﾀﾞ': 'だ', 'ﾁﾞ': 'ぢ', 'ﾂﾞ': 'づ', 'ﾃﾞ': 'で', 'ﾄﾞ': 'ど',
+      'ﾊﾞ': 'ば', 'ﾋﾞ': 'び', 'ﾌﾞ': 'ぶ', 'ﾍﾞ': 'べ', 'ﾎﾞ': 'ぼ',
+      'ﾊﾟ': 'ぱ', 'ﾋﾟ': 'ぴ', 'ﾌﾟ': 'ぷ', 'ﾍﾟ': 'ぺ', 'ﾎﾟ': 'ぽ',
+      'ｱ': 'あ', 'ｲ': 'い', 'ｳ': 'う', 'ｴ': 'え', 'ｵ': 'お',
+      'ｶ': 'か', 'ｷ': 'き', 'ｸ': 'く', 'ｹ': 'け', 'ｺ': 'こ',
+      'ｻ': 'さ', 'ｼ': 'し', 'ｽ': 'す', 'ｾ': 'せ', 'ｿ': 'そ',
+      'ﾀ': 'た', 'ﾁ': 'ち', 'ﾂ': 'つ', 'ﾃ': 'て', 'ﾄ': 'と',
+      'ﾅ': 'な', 'ﾆ': 'に', 'ﾇ': 'ぬ', 'ﾈ': 'ね', 'ﾉ': 'の',
+      'ﾊ': 'は', 'ﾋ': 'ひ', 'ﾌ': 'ふ', 'ﾍ': 'へ', 'ﾎ': 'ほ',
+      'ﾏ': 'ま', 'ﾐ': 'み', 'ﾑ': 'む', 'ﾒ': 'め', 'ﾓ': 'も',
+      'ﾔ': 'や', 'ﾕ': 'ゆ', 'ﾖ': 'よ',
+      'ﾗ': 'ら', 'ﾘ': 'り', 'ﾙ': 'る', 'ﾚ': 'れ', 'ﾛ': 'ろ',
+      'ﾜ': 'わ', 'ｦ': 'を', 'ﾝ': 'ん',
+      'ｧ': 'ぁ', 'ｨ': 'ぃ', 'ｩ': 'ぅ', 'ｪ': 'ぇ', 'ｫ': 'ぉ',
+      'ｯ': 'っ', 'ｬ': 'ゃ', 'ｭ': 'ゅ', 'ｮ': 'ょ',
+      '｡': '。', '､': '、', 'ｰ': 'ー', '｢': '「', '｣': '」', '･': '・'
+  };
 
+  const reg = new RegExp('(' + Object.keys(kanaMap).join('|') + ')', 'g');
+  return str
+          .replace(reg, function (match) {
+              return kanaMap[match];
+          })
+          .replace(/ﾞ/g, '゛')
+          .replace(/ﾟ/g, '゜');
+};
 const recordsNumSD = dataSD.length / 28
 for (let r = 0; r < recordsNumSD; ++r) {
   const offset = 28 * r
@@ -53,7 +87,7 @@ for (let r = 0; r < recordsNumSD; ++r) {
     output.lines[record[0]] = {
       id: record[0],
       name: record[3],
-      kana: record[4],
+      kana: hankana2zenkana( record[4]),
       src: '',
       dest: '',
       stations: [],
@@ -79,7 +113,7 @@ for (let r = 0; r < recordsNumSD; ++r) {
       output.stations.push({
         id: nextId,
         name: record[3],
-        kana: record[4],
+        kana: hankana2zenkana( record[4]),
         lineIds: [record[0]]
       })
       output.stationNames.push(record[3])
