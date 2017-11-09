@@ -31,6 +31,10 @@
   left: 0;
   right: 0;
 }
+.routePreview{
+  min-height: 2.5em;
+  min-width: 1px;
+}
 #textBox{
   width: 50em;
   font-size: 1.5em;

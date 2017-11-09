@@ -129,13 +129,12 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
     next.lines[i - 1] = i
   }
 
-  let textRoute: TextRouteNode[] = []
+  let textRoute: TextRouteNode[] = [] // TextBoxのWord分割したもの　Wordに意味を与える
   let route: Route = new Route()
   let sourceStation: Station | null = null
   const specialSuffix = 'SsＳｓ駅LlＬｌ'
   let type: RouteNodeType | null = null
   for (let i = 0; i < words.length; ++i) {
-    console.log(next)
     let word = words[i]
     if (word === '' || specialSuffix.indexOf(word) > -1) {
       break
@@ -257,7 +256,6 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
     }
 
     if (stationFlag || lineFlag) {
-      console.log(stationFlag, lineFlag, stationIndex, lineIndex, words, route)
       const nextFromStation = nextPopsStation(stationIndex, route)
       const nextFromLine = nextPopsLine(lineIndex, route)
       next.lines =
