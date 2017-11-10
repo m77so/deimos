@@ -67,7 +67,8 @@ for (let r = 0; r < recordsNumSD; ++r) {
             kms: [],
             akms: [],
             dupLineStationIds: [],
-            chiho: false
+            chiho: false,
+            company: []
         };
         output.lineNames[record[0]] = record[3];
     }
@@ -88,7 +89,8 @@ for (let r = 0; r < recordsNumSD; ++r) {
                 id: nextId,
                 name: record[3],
                 kana: hankana2zenkana(record[4]),
-                lineIds: [record[0]]
+                lineIds: [record[0]],
+                company: []
             });
             output.stationNames.push(record[3]);
         }
@@ -140,8 +142,10 @@ output.lines[0] = {
     dupLineStationIds: [-1],
     src: '',
     dest: '',
-    chiho: false
+    chiho: false,
+    company: []
 };
+// 地方路線情報を付記
 const chihoLines = fs
     .readFileSync('./resource/chihoLines.txt', 'utf-8')
     .split('\n');
@@ -152,5 +156,44 @@ chihoLines.forEach(chihoLine => {
         }
     });
 });
+const companyJSONData = JSON.parse(fs.readFileSync('./resource/company.json', 'utf8'));
+for (let companyName of Object.keys(companyJSONData)) {
+    const data = companyJSONData[companyName];
+    const c = Object.assign({}, data);
+    output.lineNames.forEach((lineName, lineId) => {
+        for (let i = 0; i < c.entire.length; ++i) {
+            if (lineName.indexOf(c.entire[i]) === 0) {
+                output.lines[lineId].company.push(companyName);
+                output.lines[lineId].stationIds.forEach(stationId => {
+                    let companyList = output.stations[stationId].company;
+                    if (!companyList.includes(companyName)) {
+                        companyList.push(companyName);
+                    }
+                });
+                return;
+            }
+        }
+        for (let partialLineName of Object.keys(c.partial)) {
+            if (lineName.indexOf(partialLineName) === 0) {
+                const line = output.lines[lineId];
+                line.company.push(companyName);
+                for (let i = 0; i < c.partial[partialLineName].length / 2; ++i) {
+                    const startIndex = line.stations.indexOf(c.partial[partialLineName][i * 2]);
+                    const endIndex = line.stations.indexOf(c.partial[partialLineName][i * 2 + 1]);
+                    if (startIndex < 0 || endIndex < 0) {
+                        continue;
+                    }
+                    const stationIds = line.stationIds.slice(startIndex, endIndex + 1);
+                    stationIds.forEach(stationId => {
+                        let companyList = output.stations[stationId].company;
+                        if (!companyList.includes(companyName)) {
+                            companyList.push(companyName);
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
 console.log(`import {OutputJSON} from './dataInterface'
 export const data:OutputJSON = ${JSON.stringify(output, null, '  ')}`);

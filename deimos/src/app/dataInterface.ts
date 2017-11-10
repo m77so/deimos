@@ -10,12 +10,14 @@ export interface Line {
   akms: Array<number>
   dupLineStationIds: Array<number>
   chiho: boolean
+  company: string[]
 }
 export interface Station {
   id: number
   name: string
   kana: string
   lineIds: Array<number>
+  company: string[]
 }
 export interface OutputJSON {
   lineNames: Array<string>
