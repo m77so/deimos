@@ -287,13 +287,22 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
   if (type === null && words.length > 0) {
     const word = words[words.length - 1]
     const match = word.match(/^[\u3040-\u309F]+/)
+    let prefix: RegExp
     if (match !== null) {
-      const prefixKana = new RegExp(`^${match[0]}`)
+      prefix = new RegExp(`^${match[0]}`)
       state.completionLine = next.lines
-        .filter(lineId => data.lines[lineId].kana.match(prefixKana) !== null)
+        .filter(lineId => data.lines[lineId].kana.match(prefix) !== null)
         .map(lineId => data.lineNames[lineId])
       state.completionStation = next.stations
-        .filter(staId => data.stations[staId].kana.match(prefixKana) !== null)
+        .filter(staId => data.stations[staId].kana.match(prefix) !== null)
+        .map(lineId => data.stationNames[lineId])
+    } else {
+      prefix = new RegExp(`^${word}`)
+      state.completionLine = next.lines
+        .filter(lineId => data.lines[lineId].name.match(prefix) !== null)
+        .map(lineId => data.lineNames[lineId])
+      state.completionStation = next.stations
+        .filter(staId => data.stations[staId].name.match(prefix) !== null)
         .map(lineId => data.stationNames[lineId])
     }
   } else {
