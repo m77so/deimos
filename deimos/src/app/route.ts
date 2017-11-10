@@ -1,6 +1,6 @@
 import { RouteState } from './module'
 import { Line, Station } from './dataInterface'
-import {data} from './data'
+import { data } from './data'
 interface NextPops {
   stations: number[]
   lines: number[]
@@ -254,14 +254,18 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
         }
       }
     }
-
-    if (stationFlag || lineFlag) {
+    if (type === RouteNodeType.STATION) {
+      const nextpop = nextPopsStation(stationIndex, route)
+      next.lines = nextpop.lines
+      next.stations = nextpop.stations
+    } else if (type === RouteNodeType.LINE) {
+      const nextpop = nextPopsLine(lineIndex, route)
+      next.lines = sourceStation !== null ? nextpop.lines : [] // srcが空の時、路線の次には駅がくるため
+      next.stations = nextpop.stations
+    } else if (type === RouteNodeType.DUPLICATED) {
       const nextFromStation = nextPopsStation(stationIndex, route)
       const nextFromLine = nextPopsLine(lineIndex, route)
-      next.lines =
-        sourceStation !== null || type === RouteNodeType.DUPLICATED
-          ? nextFromStation.lines.concat(nextFromLine.lines).filter(unique())
-          : []
+      next.lines = nextFromStation.lines.concat(nextFromLine.lines).filter(unique())
       next.stations = nextFromStation.stations.concat(nextFromLine.stations).filter(unique())
     }
     if (stationFlag) {
