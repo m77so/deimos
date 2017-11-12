@@ -12,20 +12,36 @@ export interface Line {
   akms: Array<number>
   dupLineStationIds: Array<number>
   chiho: boolean
-  company: string[]
+  company: number[]
 }
 export interface Station {
   id: number
   name: string
   kana: string
   lineIds: Array<number>
-  company: string[]
+  company: number[]
 }
 export interface OutputJSON {
   lineNames: Array<string>
   stationNames: Array<string>
   lines: Array<Line>
   stations: Array<Station>
+}
+export enum Companies{
+  JRH,
+  JRE,
+  JRC,
+  JRW,
+  JRS,
+  JRQ
+}
+const companyHash: {[key:string]: Companies} = {
+  "JR北": Companies.JRH,
+  "JR東": Companies.JRE,
+  "JR海": Companies.JRC,
+  "JR西": Companies.JRW,
+  "JR四": Companies.JRS,
+  "JR九": Companies.JRQ
 }
 const output: OutputJSON = {
   lineNames: [],
@@ -132,7 +148,6 @@ for (let r = 0; r < recordsNumSD; ++r) {
 
 const dataNN = fs.readFileSync('./resource/mars_nn.dat')
 const recordsNum = dataNN.length / 8
-let datann = []
 
 for (let r = 0; r < recordsNum; ++r) {
   const offset = 8 * r
@@ -175,7 +190,7 @@ output.lines[0] = {
   src: '',
   dest: '',
   chiho: false,
-  company: []
+  company: [-1]
 }
 
 // 地方路線情報を付記
@@ -197,41 +212,48 @@ interface CompanyOwnData{
 }
 const companyJSONData = JSON.parse(fs.readFileSync('./resource/company.json','utf8'))
 for( let companyName of Object.keys(companyJSONData)){
+  const companyCode = companyHash[companyName]
   const data = companyJSONData[companyName]
   const c: CompanyOwnData = Object.assign({},data)
   output.lineNames.forEach((lineName,lineId) =>{
+    let line = output.lines[lineId]
     for(let i=0;i<c.entire.length;++i){
       if (lineName.indexOf(c.entire[i])===0){
-        output.lines[lineId].company.push(companyName)
+        output.lines[lineId].company.push(companyCode)
         output.lines[lineId].stationIds.forEach(stationId=>{
           let companyList = output.stations[stationId].company
-          if(!companyList.includes(companyName)){
-            companyList.push(companyName)
+          if(!companyList.includes(companyCode)){
+            companyList.push(companyCode)
           }
         })
         return
       }
     }
     for(let partialLineName of Object.keys(c.partial)) {
+      
       if(lineName.indexOf(partialLineName)===0){
-        const line = output.lines[lineId]
-        line.company.push(companyName)
-        
         for(let i=0; i<c.partial[partialLineName].length/2; ++i){
-          const startIndex = line.stations.indexOf(c.partial[partialLineName][i*2])
-          const endIndex = line.stations.indexOf(c.partial[partialLineName][i*2+1])
+          let startIndex = line.stations.indexOf(c.partial[partialLineName][i*2])
+          let endIndex = line.stations.indexOf(c.partial[partialLineName][i*2+1])
+          ; [startIndex, endIndex] = [Math.min(startIndex,endIndex), Math.max(startIndex,endIndex)]
           if (startIndex<0 || endIndex<0){
             continue
+          }
+          for(let index=startIndex;index<=endIndex;++index){
+            line.company[index] = companyCode
           }
           const stationIds = line.stationIds.slice(startIndex,endIndex+1)
           stationIds.forEach(stationId=>{
             let companyList = output.stations[stationId].company
-            if(!companyList.includes(companyName)){
-              companyList.push(companyName)
+            if(!companyList.includes(companyCode)){
+              companyList.push(companyCode)
             }
           })
         }
       }
+    }
+    if(line.company.length<1){
+      line.company.push(-1)
     }
   })
 }

@@ -10,18 +10,26 @@ export interface Line {
   akms: Array<number>
   dupLineStationIds: Array<number>
   chiho: boolean
-  company: string[]
+  company: number[]
 }
 export interface Station {
   id: number
   name: string
   kana: string
   lineIds: Array<number>
-  company: string[]
+  company: number[]
 }
 export interface OutputJSON {
   lineNames: Array<string>
   stationNames: Array<string>
   lines: Array<Line>
   stations: Array<Station>
+}
+export enum Companies {
+  JRH,
+  JRE,
+  JRC,
+  JRW,
+  JRS,
+  JRQ
 }

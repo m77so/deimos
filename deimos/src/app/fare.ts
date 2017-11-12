@@ -1,5 +1,5 @@
+import { Companies } from './dataInterface'
 import { Route } from './route'
-
 export class FareResponse {
   fare: number
   km: number
@@ -17,18 +17,15 @@ export enum calcType {
   HokkaidoKansen,
   ShikokuKansen,
   KyushuKansen,
-  HondoChiho
+  HondoChiho,
+  HokkaidoChiho,
+  ShikokuChiho,
+  KyushuChiho
 }
-const chitaiCalc = (
-  chitaiKms: number[],
-  chitaiFares: number[],
-  km: number
-): number => {
+const chitaiCalc = (chitaiKms: number[], chitaiFares: number[], km: number): number => {
   let fareCent = 0
   for (let i = 0; i < chitaiKms.length; ++i) {
-    const subKm =
-      Math.max(chitaiKms[i - 1] || 0, Math.min(chitaiKms[i], km)) -
-      (chitaiKms[i - 1] || 0)
+    const subKm = Math.max(chitaiKms[i - 1] || 0, Math.min(chitaiKms[i], km)) - (chitaiKms[i - 1] || 0)
     if (subKm === 0) {
       break
     }
@@ -39,14 +36,7 @@ const chitaiCalc = (
 const calc = (akm: number, type: calcType): [number, calcType] => {
   // akmは100m単位であるので、1000m単位になおす
   let km = Math.ceil(akm / 10)
-  if (
-    [
-      calcType.HokkaidoKansen,
-      calcType.HondoKansen,
-      calcType.KyushuKansen,
-      calcType.ShikokuKansen
-    ].includes(type)
-  ) {
+  if ([calcType.HokkaidoKansen, calcType.HondoKansen, calcType.KyushuKansen, calcType.ShikokuKansen].includes(type)) {
     // 幹線キロ数変換
     if (11 <= km && km <= 50) {
       km = ~~((km - 1) / 5) * 5 + 3
@@ -163,26 +153,74 @@ export const fare = (route: Route): FareResponse => {
   let totalAkm = 0
   let includeChihoFlag = false
   let onlyChihoFlag = true
-  let calcTypeUsed: calcType
+  let calcTypeUsed: calcType = calcType.HokkaidoKansen
+  let edgeCompany: { [key: number]: number[] } = {}
   for (let i = 0; i < route.edges.length; ++i) {
     const edge = route.edges[i]
-    const km = Math.abs(
-      edge.line.kms[edge.startIndex] - edge.line.kms[edge.endIndex]
-    )
-    let akm = Math.abs(
-      edge.line.akms[edge.startIndex] - edge.line.akms[edge.endIndex]
-    )
+    if (edge.line.company.length === 1) {
+      // 全路線を一事業者が運営する場合
+      if (edgeCompany[edge.line.company[0]] === undefined) {
+        edgeCompany[edge.line.company[0]] = []
+      }
+      edgeCompany[edge.line.company[0]].push(i)
+    } else if (edge.line.company.length > 1) {
+      const comp: number[] = []
+      for (let index = edge.startIndex; index <= edge.endIndex; ++index) {
+        const c = edge.line.company[index]
+        if (!comp.includes(c)) {
+          comp.push(c)
+        }
+      }
+      comp.forEach(c => {
+        if (edgeCompany[c] === undefined) {
+          edgeCompany[c] = []
+        }
+        edgeCompany[c].push(i)
+      })
+    }
+    const km = Math.abs(edge.line.kms[edge.startIndex] - edge.line.kms[edge.endIndex])
+    let akm = Math.abs(edge.line.akms[edge.startIndex] - edge.line.akms[edge.endIndex])
     akm = akm === 0 ? km : akm
     totalKm += km
     totalAkm += akm
     includeChihoFlag = includeChihoFlag || edge.line.chiho
     onlyChihoFlag = onlyChihoFlag && edge.line.chiho
+    const sandoCompanyLength = Object.keys(edgeCompany).filter(c =>
+      [Companies.JRH, Companies.JRS, Companies.JRQ].includes(+c)
+    ).length
+    const honshuCompanyLength = Object.keys(edgeCompany).filter(c =>
+      [Companies.JRE, Companies.JRC, Companies.JRW].includes(+c)
+    ).length
+    if (honshuCompanyLength === 0 && sandoCompanyLength === 1) {
+      const comp = +Object.keys(edgeCompany)[0]
+      if (comp === Companies.JRH) {
+        if (onlyChihoFlag) {
+          [totalFare, calcTypeUsed] = calc(totalKm, calcType.HokkaidoChiho)
+        } else {
+          [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HokkaidoKansen)
+        }
+      } else if (comp === Companies.JRS) {
+        if (onlyChihoFlag) {
+          [totalFare, calcTypeUsed] = calc(totalKm, calcType.ShikokuChiho)
+        } else {
+          [totalFare, calcTypeUsed] = calc(totalAkm, calcType.ShikokuKansen)
+        }
+      } else if (comp === Companies.JRQ) {
+        if (onlyChihoFlag) {
+          [totalFare, calcTypeUsed] = calc(totalKm, calcType.KyushuChiho)
+        } else {
+          [totalFare, calcTypeUsed] = calc(totalAkm, calcType.KyushuKansen)
+        }
+      }
+    } else {
+      if (onlyChihoFlag) {
+        [totalFare, calcTypeUsed] = calc(totalKm, calcType.HondoChiho)
+      } else {
+        [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HondoKansen)
+      }
+    }
   }
-  if (onlyChihoFlag) {
-    [totalFare, calcTypeUsed] = calc(totalKm, calcType.HondoChiho)
-  } else {
-    [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HondoKansen)
-  }
+
   return {
     fare: totalFare,
     km: totalKm,
