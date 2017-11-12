@@ -1,5 +1,11 @@
-import * as fs from 'fs'
-import * as iconv from 'iconv-lite'
+import { start } from 'repl';
+import * as fs from 'fs';
+import * as iconv from 'iconv-lite';
+export interface MapZairai{
+  startIndex: number
+  endIndex: number
+  targetLine: number
+}
 export interface Line {
   id: number
   name: string
@@ -13,6 +19,7 @@ export interface Line {
   dupLineStationIds: Array<number>
   chiho: boolean
   company: number[]
+  mapZairai: MapZairai[]
 }
 export interface Station {
   id: number
@@ -114,7 +121,8 @@ for (let r = 0; r < recordsNumSD; ++r) {
       akms: [],
       dupLineStationIds: [],
       chiho: false,
-      company: []
+      company: [],
+      mapZairai: []
     }
     output.lineNames[record[0]] = record[3]
   } else if (record[0] > 0) {
@@ -190,7 +198,8 @@ output.lines[0] = {
   src: '',
   dest: '',
   chiho: false,
-  company: [-1]
+  company: [],
+  mapZairai: []
 }
 
 // 地方路線情報を付記
@@ -257,7 +266,26 @@ for( let companyName of Object.keys(companyJSONData)){
     }
   })
 }
+interface ShinzaiInterface {
+  src: string
+  dest: string
+  line1: string
+  line2: string
+}
+const dataShinzai = JSON.parse(fs.readFileSync('./resource/shinzai.json','utf8'))
+const shinzais: ShinzaiInterface[] = Object.assign([],dataShinzai)
 
+for(let shinzai of shinzais){
+  const shin = output.lines[output.lineNames.indexOf(shinzai.line2)]
+  const zai = output.lines[output.lineNames.indexOf(shinzai.line1)]
+  const startIndex = shin.stations.indexOf(shinzai.src)
+  const endIndex = shin.stations.indexOf(shinzai.dest)
+  shin.mapZairai.push({
+    startIndex: Math.min(startIndex,endIndex),
+    endIndex: Math.max(startIndex,endIndex),
+    targetLine: zai.id
+  })
+}
 console.log(
   `import {OutputJSON} from './dataInterface'
 export const data:OutputJSON = ${JSON.stringify(output, null, '  ')}`

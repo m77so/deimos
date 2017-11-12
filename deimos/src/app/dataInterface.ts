@@ -1,3 +1,8 @@
+export interface MapZairai {
+  startIndex: number
+  endIndex: number
+  targetLine: number
+}
 export interface Line {
   id: number
   name: string
@@ -11,6 +16,7 @@ export interface Line {
   dupLineStationIds: Array<number>
   chiho: boolean
   company: number[]
+  mapZairai: MapZairai[]
 }
 export interface Station {
   id: number

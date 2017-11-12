@@ -85,7 +85,8 @@ for (let r = 0; r < recordsNumSD; ++r) {
             akms: [],
             dupLineStationIds: [],
             chiho: false,
-            company: []
+            company: [],
+            mapZairai: []
         };
         output.lineNames[record[0]] = record[3];
     }
@@ -159,7 +160,8 @@ output.lines[0] = {
     src: '',
     dest: '',
     chiho: false,
-    company: [-1]
+    company: [],
+    mapZairai: []
 };
 // 地方路線情報を付記
 const chihoLines = fs
@@ -216,6 +218,19 @@ for (let companyName of Object.keys(companyJSONData)) {
         if (line.company.length < 1) {
             line.company.push(-1);
         }
+    });
+}
+const dataShinzai = JSON.parse(fs.readFileSync('./resource/shinzai.json', 'utf8'));
+const shinzais = Object.assign([], dataShinzai);
+for (let shinzai of shinzais) {
+    const shin = output.lines[output.lineNames.indexOf(shinzai.line2)];
+    const zai = output.lines[output.lineNames.indexOf(shinzai.line1)];
+    const startIndex = shin.stations.indexOf(shinzai.src);
+    const endIndex = shin.stations.indexOf(shinzai.dest);
+    shin.mapZairai.push({
+        startIndex: Math.min(startIndex, endIndex),
+        endIndex: Math.max(startIndex, endIndex),
+        targetLine: zai.id
     });
 }
 console.log(`import {OutputJSON} from './dataInterface'
