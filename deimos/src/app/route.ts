@@ -35,9 +35,11 @@ export interface RouteEdge {
 export class Route {
   stations: Station[]
   edges: RouteEdge[]
+  unroutableEdges: RouteEdge[]
   constructor() {
     this.stations = []
     this.edges = []
+    this.unroutableEdges = []
   }
 
   ngStations(lineId: number, stationId: number): number[] {
@@ -47,7 +49,7 @@ export class Route {
     if (stationIndex === -1) {
       return []
     }
-    return this.edges
+    return [...this.edges, ...this.unroutableEdges]
       .filter(e => e.line.id === lineId)
       .map(e => {
         if (stationIndex <= e.startIndex && stationIndex <= e.endIndex) {
@@ -57,6 +59,32 @@ export class Route {
         }
       })
       .reduce((a, b) => a.concat(b), [])
+  }
+
+  pushEdge(edge: RouteEdge) {
+    this.edges.push(edge)
+    if (edge.line.mapZairai.length > 0) {
+      const edgeStartIndex = Math.min(edge.startIndex, edge.endIndex)
+      const edgeEndIndex = Math.max(edge.startIndex, edge.endIndex)
+      for (let zairai of edge.line.mapZairai) {
+        if (edgeStartIndex < zairai.endIndex && edgeEndIndex > zairai.startIndex) {
+          const startIndex = Math.max(edgeStartIndex, zairai.startIndex)
+          const endIndex = Math.min(edgeEndIndex, zairai.endIndex)
+          const startStationId = edge.line.stationIds[startIndex]
+          const endStationId = edge.line.stationIds[endIndex]
+          const targetLine = data.lines[zairai.targetLine]
+          this.unroutableEdges.push({
+            line: targetLine,
+            startIndex: targetLine.stationIds.indexOf(startStationId),
+            endIndex: targetLine.stationIds.indexOf(endStationId),
+            start: data.stations[startStationId],
+            end: data.stations[endStationId],
+            direction: Direction.DOWN
+          })
+        }
+      }
+    }
+    console.log(this)
   }
 }
 const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
@@ -176,7 +204,6 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
         route.stations[0] = sourceStation
       }
     }
-
     if (type === RouteNodeType.STATION) {
       textRoute.push({
         type: RouteNodeType.STATION,
@@ -224,7 +251,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
           const startLineStationId = line.stationIds.indexOf(startStationId)
           const endLineStationId = line.stationIds.indexOf(endStationId)
           const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
-          route.edges.push({
+          route.pushEdge({
             line: line,
             start: start,
             end: end,
@@ -243,7 +270,7 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
           const startLineStationId = line.stationIds.indexOf(startStationId)
           const endLineStationId = line.stationIds.indexOf(endStationId)
           const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
-          route.edges.push({
+          route.pushEdge({
             line: line,
             start: start,
             end: end,

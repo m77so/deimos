@@ -239,7 +239,6 @@ for( let companyName of Object.keys(companyJSONData)){
       }
     }
     for(let partialLineName of Object.keys(c.partial)) {
-      
       if(lineName.indexOf(partialLineName)===0){
         for(let i=0; i<c.partial[partialLineName].length/2; ++i){
           let startIndex = line.stations.indexOf(c.partial[partialLineName][i*2])
@@ -278,12 +277,19 @@ const shinzais: ShinzaiInterface[] = Object.assign([],dataShinzai)
 for(let shinzai of shinzais){
   const shin = output.lines[output.lineNames.indexOf(shinzai.line2)]
   const zai = output.lines[output.lineNames.indexOf(shinzai.line1)]
-  const startIndex = shin.stations.indexOf(shinzai.src)
-  const endIndex = shin.stations.indexOf(shinzai.dest)
+  let startIndex = shin.stations.indexOf(shinzai.src)
+  let endIndex = shin.stations.indexOf(shinzai.dest)
   shin.mapZairai.push({
     startIndex: Math.min(startIndex,endIndex),
     endIndex: Math.max(startIndex,endIndex),
     targetLine: zai.id
+  })
+  startIndex = zai.stations.indexOf(shinzai.src)
+  endIndex = zai.stations.indexOf(shinzai.dest)
+  zai.mapZairai.push({
+    startIndex: Math.min(startIndex,endIndex),
+    endIndex: Math.max(startIndex,endIndex),
+    targetLine: shin.id
   })
 }
 console.log(
