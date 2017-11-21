@@ -20,7 +20,9 @@ export enum calcType {
   HondoChiho,
   HokkaidoChiho,
   ShikokuChiho,
-  KyushuChiho
+  KyushuChiho,
+  TokuteiTokyo,
+  TokuteiOsaka
 }
 const chitaiCalc = (chitaiKms: number[], chitaiFares: number[], km: number): number => {
   let fareCent = 0
@@ -36,6 +38,45 @@ const chitaiCalc = (chitaiKms: number[], chitaiFares: number[], km: number): num
 const calc = (akm: number, type: calcType): [number, calcType] => {
   // akmは100m単位であるので、1000m単位になおす
   let km = Math.ceil(akm / 10)
+
+  // 決め打ち
+  let fareYen = 0
+  if (type === calcType.HondoKansen) {
+    if (km <= 10) {
+      const fares = [140, 190, 200, 200]
+      fareYen = fares[~~((km - 1) / 3)]
+    }
+  } else if (type === calcType.HondoChiho) {
+    if (km <= 10) {
+      const fares = [140, 190, 210, 210]
+      fareYen = fares[~~((km - 1) / 3)]
+    } else if (11 <= km && km <= 91) {
+      const lim = [11, 16, 21, 24, 33, 42, 47, 56, 65, 74, 83]
+      const fares = [240, 320, 410, 500, 670, 840, 970, 1140, 1320, 1490, 1660]
+      const index = lim.filter(k => k <= km).length - 1
+      fareYen = fares[index]
+    } else if (101 <= km && km <= 110) {
+      fareYen = 1940
+    } else if (292 <= km && km <= 310) {
+      fareYen = 5620
+    }
+  } else if (type === calcType.TokuteiTokyo) {
+    if (km <= 10) {
+      const fares = [140, 160, 170, 170]
+      fareYen = fares[~~((km - 1) / 3)]
+    }
+  } else if (type === calcType.TokuteiOsaka) {
+    if (km <= 10) {
+      const fares = [120, 160, 180, 180]
+      fareYen = fares[~~((km - 1) / 3)]
+    }
+  }
+
+  if (fareYen > 0) {
+    return [fareYen, type]
+  }
+
+  // 計算によって求める
   if ([calcType.HokkaidoKansen, calcType.HondoKansen, calcType.KyushuKansen, calcType.ShikokuKansen].includes(type)) {
     // 幹線キロ数変換
     if (11 <= km && km <= 50) {
@@ -132,18 +173,6 @@ const calc = (akm: number, type: calcType): [number, calcType] => {
   }
   fareCent *= 1.08
   fareCent = Math.round(fareCent / 1000) * 1000
-  if (type === calcType.HondoChiho) {
-    if (11 <= km && km <= 91) {
-      const lim = [11, 16, 21, 24, 33, 42, 47, 56, 65, 74, 83]
-      const fares = [240, 320, 410, 500, 670, 840, 970, 1140, 1320, 1490, 1660]
-      const index = lim.filter(k => k <= km).length - 1
-      fareCent = fares[index] * 100
-    } else if (101 <= km && km <= 110) {
-      fareCent = 1940 * 100
-    } else if (292 <= km && km <= 310) {
-      fareCent = 5620 * 100
-    }
-  }
 
   return [fareCent / 100, type]
 }
@@ -194,26 +223,26 @@ export const fare = (route: Route): FareResponse => {
     if (honshuCompanyLength === 0 && sandoCompanyLength === 1) {
       const comp = +Object.keys(edgeCompany)[0]
       if (comp === Companies.JRH) {
-        if (onlyChihoFlag) {
+        if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
           [totalFare, calcTypeUsed] = calc(totalKm, calcType.HokkaidoChiho)
         } else {
           [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HokkaidoKansen)
         }
       } else if (comp === Companies.JRS) {
-        if (onlyChihoFlag) {
+        if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
           [totalFare, calcTypeUsed] = calc(totalKm, calcType.ShikokuChiho)
         } else {
           [totalFare, calcTypeUsed] = calc(totalAkm, calcType.ShikokuKansen)
         }
       } else if (comp === Companies.JRQ) {
-        if (onlyChihoFlag) {
+        if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
           [totalFare, calcTypeUsed] = calc(totalKm, calcType.KyushuChiho)
         } else {
           [totalFare, calcTypeUsed] = calc(totalAkm, calcType.KyushuKansen)
         }
       }
     } else {
-      if (onlyChihoFlag) {
+      if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
         [totalFare, calcTypeUsed] = calc(totalKm, calcType.HondoChiho)
       } else {
         [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HondoKansen)
