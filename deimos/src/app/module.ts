@@ -28,18 +28,15 @@ export const setNextPop = (line: boolean, text: string): NextAction => ({
   text: text
 })
 export interface RouteState {
-  source: string
-  destination: string
-  sourceValid: boolean
-  destinationValid: boolean
-  text: string
-  completionStation: string[]
-  completionLine: string[]
-  lastInputHalfway: boolean
-  duplicatedKomaru: boolean
-  via: string[]
-  route: Route
-  fare: FareResponse
+  source: string // 始発駅が入る　あんまり使ってない
+  destination: string // 着駅が入る　あんまり使ってない　
+  text: string // 入力欄
+  completionStation: string[] // 補完リスト・駅名
+  completionLine: string[] // 補完リスト・路線名
+  lastInputHalfway: boolean // 最後の要素が入力中途か判定　補完ボタンを押した時に除去するかどうか
+  duplicatedKomaru: boolean // 駅か路線かわからなくて困った時
+  route: Route // 経路
+  fare: FareResponse // 運賃
 }
 
 export type RouteActions = TextAction | NextAction
@@ -47,10 +44,7 @@ export type RouteActions = TextAction | NextAction
 const initialState: RouteState = {
   source: '',
   destination: '',
-  sourceValid: false,
-  destinationValid: false,
   text: '',
-  via: [],
   duplicatedKomaru: false,
   completionLine: [],
   completionStation: [],

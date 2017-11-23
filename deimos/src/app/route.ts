@@ -353,11 +353,6 @@ export const textFunction = (
     state.completionStation = next.stations.map(staId => data.stationNames[staId])
     state.lastInputHalfway = false
   }
-  state.via = []
-  for (let i = 0; i < route.edges.length; ++i) {
-    state.via.push('路線:' + route.edges[i].line.name)
-    state.via.push('駅:' + route.stations[i + 1].name)
-  }
   state.source = sourceStation !== null ? sourceStation.name : ''
   state.destination = route.stations.length > 1 ? route.stations[route.stations.length - 1].name : ''
   state.route = route
