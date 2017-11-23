@@ -139,10 +139,13 @@ const unique = function() {
     return !(element in seen) && (seen[element] = 1)
   }
 }
-
-export const textFunction = (state: RouteState, text: string): RouteState => {
+export const textFunction = (
+  state: RouteState,
+  text: string,
+  lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED
+): RouteState => {
   const words = text
-    .replace(/^\s+|\s+$/g, '')
+    .replace(/^\s+/g, '')
     .replace(/\s+/g, ' ')
     .split(' ')
 
@@ -180,9 +183,21 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
     type = stationFlag
       ? lineFlag ? RouteNodeType.DUPLICATED : RouteNodeType.STATION
       : lineFlag ? RouteNodeType.LINE : null
+
     if (type === RouteNodeType.DUPLICATED) {
-      type =
-        'SsＳｓ駅'.indexOf(suffix) > -1 ? RouteNodeType.STATION : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
+      if (i === words.length - 1 && lastNodeType !== RouteNodeType.DUPLICATED) {
+        type = lastNodeType
+        if (lastNodeType === RouteNodeType.LINE) {
+          words[i] += 'L'
+        } else {
+          words[i] += '駅'
+        }
+      } else {
+        type =
+          'SsＳｓ駅'.indexOf(suffix) > -1
+            ? RouteNodeType.STATION
+            : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
+      }
     }
     if (sourceStation === null && type !== null) {
       if (textRoute.length === 0) {
@@ -332,9 +347,11 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
         .filter(staId => data.stations[staId].name.match(prefix) !== null)
         .map(lineId => data.stationNames[lineId])
     }
+    state.lastInputHalfway = true
   } else {
     state.completionLine = next.lines.map(lineId => data.lineNames[lineId])
     state.completionStation = next.stations.map(staId => data.stationNames[staId])
+    state.lastInputHalfway = false
   }
   state.via = []
   for (let i = 0; i < route.edges.length; ++i) {
@@ -344,6 +361,6 @@ export const textFunction = (state: RouteState, text: string): RouteState => {
   state.source = sourceStation !== null ? sourceStation.name : ''
   state.destination = route.stations.length > 1 ? route.stations[route.stations.length - 1].name : ''
   state.route = route
-  state.text = text
+  state.text = words.join(' ')
   return state
 }

@@ -68,7 +68,9 @@ class FareComponent extends React.Component<FareProps, {}> {
     const calcTypeJa = calcTypeJaStrings[this.props.fare.calcType] || '日本語未定義'
     return (
       <p>
-        営業キロ：{this.props.fare.km / 10}キロ、 運賃計算キロ：{this.props.fare.akm / 10}キロ、 運賃：{this.props.fare.fare}円、 計算方式：{calcTypeJa}
+        営業キロ：{this.props.fare.km / 10}キロ、 運賃計算キロ：{this.props.fare.akm / 10}キロ、 運賃：{
+          this.props.fare.fare
+        }円、 計算方式：{calcTypeJa}
       </p>
     )
   }
@@ -87,18 +89,20 @@ export class App extends React.Component<Props, {}> {
           onChange={event => this.props.actions.changeText(event.target.value)}
         />
         {this.props.value.duplicatedKomaru ? (
-          <div>路線名と駅名で同じ名前のやつがあると判定するのがめんどくさいので，駅なら末尾にsか駅，路線なら末尾にlをつけてください．そのうち頑張って実装します．</div>
+          <div>
+            路線名と駅名で同じ名前のやつがあると判定するのがめんどくさいので，駅なら末尾にsか駅，路線なら末尾にlをつけてください．そのうち頑張って実装します．
+          </div>
         ) : (
           ''
         )}
         <div>
           ほかん
-          <ul>
+          <ul className="completion">
             {this.props.value.completionLine.slice(0, 30).map(str => {
-              return <li key={'l' + str}>LINE:{str}</li>
+              return <li key={str + '線'} onClick={event => this.props.actions.setNextPop(true, str)}>路線：{str}</li>
             })}
             {this.props.value.completionStation.slice(0, 300).map(str => {
-              return <li key={'s' + str}>{str}</li>
+              return <li key={'s' + str} onClick={event => this.props.actions.setNextPop(false, str)}>{str}</li>
             })}
           </ul>
         </div>

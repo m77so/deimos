@@ -1,7 +1,7 @@
 import { App } from './App'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
-import { changeText } from './module'
+import { changeText, setNextPop } from './module'
 import { ReduxAction, ReduxState } from '../store'
 
 export class ActionDispatcher {
@@ -9,6 +9,9 @@ export class ActionDispatcher {
 
   public changeText(text: string) {
     this.dispatch(changeText(text))
+  }
+  public setNextPop(line: boolean, text: string) {
+    this.dispatch(setNextPop(line, text))
   }
 }
 
