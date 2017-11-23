@@ -59,12 +59,12 @@ export default function reducer(state: RouteState = initialState, action: RouteA
     case ActionNames.NEXT:
       copyState = textFunction(
         copyState,
-        `${state.text
+        state.text
           .replace(/^\s+|\s+$/g, '')
           .replace(/\s+/g, ' ')
           .split(' ')
-          .slice(0, state.lastInputHalfway ? -1 : 99999)
-          .join(' ')} ${action.text}`,
+          .slice(0, state.lastInputHalfway ? -1 : 99999).concat(action.text)
+          .join(' '),
         action.line ? RouteNodeType.LINE : RouteNodeType.STATION
       )
       copyState.fare = fare(copyState.route)
