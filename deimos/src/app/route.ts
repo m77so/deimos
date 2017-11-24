@@ -53,7 +53,8 @@ export class Route {
       return []
     }
     const line = data.lines[lineId]
-    let ngStationIds: number[] = []
+    
+    let ngStationIds: number[] = [stationId]
     // 一度来たことのある駅からこれ以上移動はできない
     if (this.routedStations[stationId] === 2) {
       return line.stationIds
@@ -402,5 +403,6 @@ export const textFunction = (
   state.destination = route.stations.length > 1 ? route.stations[route.stations.length - 1].name : ''
   state.route = route
   state.text = words.join(' ')
+  console.log(state)
   return state
 }
