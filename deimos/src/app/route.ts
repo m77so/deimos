@@ -161,7 +161,12 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
   )
   const lines = Object.keys(lineTemp)
     .map(id => ~~id)
-    .filter(id => lineTemp[id] === 1 && id !== lineIndex)
+    .filter(
+      id =>
+        lineTemp[id] === 1 &&
+        id !== lineIndex &&
+        route.ngStations(id, srcStation.id).length < data.lines[id].stationIds.length // 遷移先からまだ移動できること
+    )
   return {
     stations: stations,
     lines: lines
@@ -187,7 +192,9 @@ const nextPopsStation = (stationId: number, route: Route): NextPops => {
     })
   })
 
-  const lines = station.lineIds
+  const lines = station.lineIds.filter(
+    id => route.ngStations(id, station.id).length < data.lines[id].stationIds.length // 遷移先からまだ移動できること
+  )
 
   const stations = Object.keys(stationTemp).map(id => ~~id)
   return {
