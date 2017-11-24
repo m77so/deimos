@@ -90,8 +90,24 @@ export class Route {
       })
       .reduce((a, b) => a.concat(b), ngStationIds)
   }
-
-  pushEdge(edge: RouteEdge) {
+  pushEdge(startStationId: number, endStationId: number, lineId: number = -1) {
+    const start = data.stations[startStationId]
+    const end = data.stations[endStationId]
+    const lines = lineId === -1 ? start.lineIds.filter(id => end.lineIds.includes(id))[0] : lineId
+    const line: Line = data.lines[lines]
+    const startLineStationId = line.stationIds.indexOf(startStationId)
+    const endLineStationId = line.stationIds.indexOf(endStationId)
+    const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
+    this._pushEdge({
+      line: line,
+      start: start,
+      end: end,
+      startIndex: startLineStationId,
+      endIndex: endLineStationId,
+      direction: direction
+    })
+  }
+  private _pushEdge(edge: RouteEdge) {
     this.edges.push(edge)
     const edgeMinIndex = Math.min(edge.startIndex, edge.endIndex)
     const edgeMaxIndex = Math.max(edge.startIndex, edge.endIndex)
@@ -298,7 +314,6 @@ export const textFunction = (
       }
       // 駅　路線　駅
       // 駅　駅
-
       if (route.stations.length >= 2) {
         if (textRoute[textRoute.length - 2].type === RouteNodeType.LINE) {
           // 駅　路線　駅　となる場合
@@ -306,66 +321,24 @@ export const textFunction = (
           const line = textRoute[textRoute.length - 2].line!
           const startStationId = route.stations[route.stations.length - 2].id
           const endStationId = route.stations[route.stations.length - 1].id
-          const start = data.stations[startStationId]
-          const end = data.stations[endStationId]
-          const startLineStationId = line.stationIds.indexOf(startStationId)
-          const endLineStationId = line.stationIds.indexOf(endStationId)
-          const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
-          route.pushEdge({
-            line: line,
-            start: start,
-            end: end,
-            startIndex: startLineStationId,
-            endIndex: endLineStationId,
-            direction: direction
-          })
+          route.pushEdge(startStationId, endStationId, line.id)
         } else if (textRoute[textRoute.length - 2].type === RouteNodeType.STATION) {
           // 駅　駅　となる場合
           const startStationId = route.stations[route.stations.length - 2].id
           const endStationId = route.stations[route.stations.length - 1].id
-          const start = data.stations[startStationId]
-          const end = data.stations[endStationId]
-          const lines = start.lineIds.filter(id => end.lineIds.includes(id))
-          const line: Line = data.lines[lines[0]]
-          const startLineStationId = line.stationIds.indexOf(startStationId)
-          const endLineStationId = line.stationIds.indexOf(endStationId)
-          const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
-          route.pushEdge({
-            line: line,
-            start: start,
-            end: end,
-            startIndex: startLineStationId,
-            endIndex: endLineStationId,
-            direction: direction
-          })
+          route.pushEdge(startStationId, endStationId)
         }
       }
     } else if (type === RouteNodeType.LINE) {
       if (textRoute[textRoute.length - 2].type === RouteNodeType.LINE) {
         // 駅　路線　路線
-        console.log(lineId)
         const middleStations = next.stations.filter(id => data.stations[id].lineIds.includes(lineId))
-
         const middleStationId = middleStations[0]
         route.stations.push(data.stations[middleStationId])
-        console.log(middleStations, route)
+        const line = textRoute[textRoute.length - 2].line!
         const startStationId = route.stations[route.stations.length - 2].id
         const endStationId = route.stations[route.stations.length - 1].id
-        const start = data.stations[startStationId]
-        const end = data.stations[endStationId]
-        const lines = start.lineIds.filter(id => end.lineIds.includes(id))
-        const line: Line = data.lines[lines[0]]
-        const startLineStationId = line.stationIds.indexOf(startStationId)
-        const endLineStationId = line.stationIds.indexOf(endStationId)
-        const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
-        route.pushEdge({
-          line: line,
-          start: start,
-          end: end,
-          startIndex: startLineStationId,
-          endIndex: endLineStationId,
-          direction: direction
-        })
+        route.pushEdge(startStationId, endStationId, line.id)
       }
     }
     if (type === RouteNodeType.STATION) {
