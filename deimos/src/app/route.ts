@@ -37,33 +37,75 @@ export class Route {
   stations: Station[]
   edges: RouteEdge[]
   unroutableEdges: RouteEdge[]
+  routedStations: { [key: number]: number } // stationId をKeyとしてもつ　6の字，9の字用
   constructor() {
     this.stations = []
     this.edges = []
     this.unroutableEdges = []
+    this.routedStations = {}
   }
 
   ngStations(lineId: number, stationId: number): number[] {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?
     // stationIdsで返します．
     const stationIndex = data.lines[lineId].stationIds.indexOf(stationId)
+    console.log(stationIndex, data.stationNames[stationId], data.lineNames[lineId])
     if (stationIndex === -1) {
       return []
     }
+    const line = data.lines[lineId]
+    let ngStationIds: number[] = []
+    if (this.routedStations[stationId] === 2){
+      return line.stationIds
+    }
+    for (let i = stationIndex - 1; i >= 0; --i) {
+      const checkStationId = line.stationIds[i]
+      console.log(this.routedStations[checkStationId],data.stationNames[checkStationId])
+      if (this.routedStations[checkStationId] > 0) {
+        ngStationIds = ngStationIds.concat(line.stationIds.slice(0, i))
+        break
+      }
+    }
+    console.log(ngStationIds.map(v=>data.stationNames[v]),this.routedStations)
+    // 新疋田 米原 山科 マキノ 近江塩津 北陸
+
+    for (let i = stationIndex + 1; i < line.stationIds.length; ++i) {
+      const checkStationId = line.stationIds[i]
+      console.log(this.routedStations[checkStationId],data.stationNames[checkStationId])
+      if (this.routedStations[checkStationId] > 0) {
+        
+        ngStationIds = ngStationIds.concat(line.stationIds.slice(i + 1))
+        break
+      }
+    }
+    console.log(ngStationIds.map(v=>data.stationNames[v]),this.routedStations)
+    
+
     return [...this.edges, ...this.unroutableEdges]
       .filter(e => e.line.id === lineId)
       .map(e => {
+        console.log(e)
         if (stationIndex <= e.startIndex && stationIndex <= e.endIndex) {
+          // 起点≦エッジ端ーーエッジ端　な時
           return e.line.stationIds.slice(Math.min(e.startIndex, e.endIndex) + 1)
-        } else {
+        } else if (stationIndex >= e.startIndex && stationIndex >= e.endIndex) {
+          // エッジ端ーーエッジ端≦起点　な時
           return e.line.stationIds.slice(0, Math.max(e.startIndex, e.endIndex))
+        } else {
+          // エッジ端ー起点ーエッジ端　な時
+          return e.line.stationIds
         }
       })
-      .reduce((a, b) => a.concat(b), [])
+      .reduce((a, b) => a.concat(b), ngStationIds)
   }
 
   pushEdge(edge: RouteEdge) {
     this.edges.push(edge)
+    const edgeMinIndex = Math.min(edge.startIndex, edge.endIndex)
+    const edgeMaxIndex = Math.max(edge.startIndex, edge.endIndex)
+    edge.line.stationIds.slice(edgeMinIndex, edgeMaxIndex+1).forEach(stationId => {
+      this.routedStations[stationId] = this.routedStations[stationId]===undefined? 1 : 2
+    })
     if (edge.line.mapZairai.length > 0) {
       const edgeStartIndex = Math.min(edge.startIndex, edge.endIndex)
       const edgeEndIndex = Math.max(edge.startIndex, edge.endIndex)
@@ -74,18 +116,21 @@ export class Route {
           const startStationId = edge.line.stationIds[startIndex]
           const endStationId = edge.line.stationIds[endIndex]
           const targetLine = data.lines[zairai.targetLine]
-          this.unroutableEdges.push({
+          const unroutableEdge: RouteEdge = {
             line: targetLine,
             startIndex: targetLine.stationIds.indexOf(startStationId),
             endIndex: targetLine.stationIds.indexOf(endStationId),
             start: data.stations[startStationId],
             end: data.stations[endStationId],
             direction: Direction.DOWN
+          }
+          unroutableEdge.line.stationIds.slice(edgeMinIndex, edgeMaxIndex+1).forEach(stationId => {
+            this.routedStations[stationId] = 1
           })
+          this.unroutableEdges.push(unroutableEdge)
         }
       }
     }
-    console.log(this)
   }
 }
 const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
@@ -175,10 +220,10 @@ export const textFunction = (
       word = word.slice(0, -1)
     }
 
-    const stationIndex = data.stationNames.indexOf(word)
-    const lineIndex = data.lineNames.indexOf(word)
-    const stationFlag = next.stations.includes(stationIndex)
-    const lineFlag = next.lines.includes(lineIndex)
+    const stationId = data.stationNames.indexOf(word)
+    const lineId = data.lineNames.indexOf(word)
+    const stationFlag = next.stations.includes(stationId)
+    const lineFlag = next.lines.includes(lineId)
 
     type = stationFlag
       ? lineFlag ? RouteNodeType.DUPLICATED : RouteNodeType.STATION
@@ -202,14 +247,14 @@ export const textFunction = (
     if (sourceStation === null && type !== null) {
       if (textRoute.length === 0) {
         if (type === RouteNodeType.STATION) {
-          sourceStation = data.stations[stationIndex]
+          sourceStation = data.stations[stationId]
         }
       } else {
         if (textRoute[0].type === RouteNodeType.LINE) {
-          sourceStation = data.stations[stationIndex]
+          sourceStation = data.stations[stationId]
         } else if (type === RouteNodeType.STATION) {
           textRoute[0].type = RouteNodeType.LINE
-          sourceStation = data.stations[stationIndex]
+          sourceStation = data.stations[stationId]
         } else if (type === RouteNodeType.LINE || type === RouteNodeType.DUPLICATED) {
           textRoute[0].type = RouteNodeType.STATION
           sourceStation = data.stations[textRoute[0].value.id] // route[0].value で取れるのにinterfaceが邪魔
@@ -222,29 +267,29 @@ export const textFunction = (
     if (type === RouteNodeType.STATION) {
       textRoute.push({
         type: RouteNodeType.STATION,
-        value: data.stations[stationIndex],
-        station: data.stations[stationIndex],
+        value: data.stations[stationId],
+        station: data.stations[stationId],
         line: null
       })
     } else if (type === RouteNodeType.LINE) {
       textRoute.push({
         type: RouteNodeType.LINE,
-        value: data.lines[lineIndex],
+        value: data.lines[lineId],
         station: null,
-        line: data.lines[lineIndex]
+        line: data.lines[lineId]
       })
     } else if (type === RouteNodeType.DUPLICATED) {
       textRoute.push({
         type: RouteNodeType.DUPLICATED,
-        value: data.stations[stationIndex],
-        station: data.stations[stationIndex],
-        line: data.lines[lineIndex]
+        value: data.stations[stationId],
+        station: data.stations[stationId],
+        line: data.lines[lineId]
       })
     }
     // ☓DUPの判定処理を書く　DUPはめんどくさいので一旦滅ぼす
 
     if (type === RouteNodeType.STATION) {
-      route.stations.push(data.stations[stationIndex])
+      route.stations.push(data.stations[stationId])
       while (
         route.stations.length > 1 &&
         route.stations[route.stations.length - 1].id === route.stations[route.stations.length - 2].id
@@ -297,22 +342,22 @@ export const textFunction = (
       }
     }
     if (type === RouteNodeType.STATION) {
-      const nextpop = nextPopsStation(stationIndex, route)
+      const nextpop = nextPopsStation(stationId, route)
       next.lines = nextpop.lines
       next.stations = nextpop.stations
     } else if (type === RouteNodeType.LINE) {
-      const nextpop = nextPopsLine(lineIndex, route)
+      const nextpop = nextPopsLine(lineId, route)
       next.lines = sourceStation !== null ? nextpop.lines : [] // srcが空の時、路線の次には駅がくるため
       next.stations = nextpop.stations
     } else if (type === RouteNodeType.DUPLICATED) {
-      const nextFromStation = nextPopsStation(stationIndex, route)
-      const nextFromLine = nextPopsLine(lineIndex, route)
+      const nextFromStation = nextPopsStation(stationId, route)
+      const nextFromLine = nextPopsLine(lineId, route)
       next.lines = nextFromStation.lines.concat(nextFromLine.lines).filter(unique())
       next.stations = nextFromStation.stations.concat(nextFromLine.stations).filter(unique())
     }
     if (stationFlag) {
       for (let ii = 0, j = next.stations.length; ii < j; ++ii) {
-        if (next.stations[ii] === stationIndex) {
+        if (next.stations[ii] === stationId) {
           next.stations.splice(ii, 1)
           break
         }
