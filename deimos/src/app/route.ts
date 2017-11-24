@@ -49,42 +49,34 @@ export class Route {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?
     // stationIdsで返します．
     const stationIndex = data.lines[lineId].stationIds.indexOf(stationId)
-    console.log(stationIndex, data.stationNames[stationId], data.lineNames[lineId])
     if (stationIndex === -1) {
       return []
     }
     const line = data.lines[lineId]
     let ngStationIds: number[] = []
-    if (this.routedStations[stationId] === 2){
+    // 一度来たことのある駅からこれ以上移動はできない
+    if (this.routedStations[stationId] === 2) {
       return line.stationIds
     }
+    // 他の路線で訪れたことのある駅以遠を行けなくする
     for (let i = stationIndex - 1; i >= 0; --i) {
       const checkStationId = line.stationIds[i]
-      console.log(this.routedStations[checkStationId],data.stationNames[checkStationId])
       if (this.routedStations[checkStationId] > 0) {
         ngStationIds = ngStationIds.concat(line.stationIds.slice(0, i))
         break
       }
     }
-    console.log(ngStationIds.map(v=>data.stationNames[v]),this.routedStations)
-    // 新疋田 米原 山科 マキノ 近江塩津 北陸
-
     for (let i = stationIndex + 1; i < line.stationIds.length; ++i) {
       const checkStationId = line.stationIds[i]
-      console.log(this.routedStations[checkStationId],data.stationNames[checkStationId])
       if (this.routedStations[checkStationId] > 0) {
-        
         ngStationIds = ngStationIds.concat(line.stationIds.slice(i + 1))
         break
       }
     }
-    console.log(ngStationIds.map(v=>data.stationNames[v]),this.routedStations)
-    
-
+    // 自路線で乗車済みの辺の処理
     return [...this.edges, ...this.unroutableEdges]
       .filter(e => e.line.id === lineId)
       .map(e => {
-        console.log(e)
         if (stationIndex <= e.startIndex && stationIndex <= e.endIndex) {
           // 起点≦エッジ端ーーエッジ端　な時
           return e.line.stationIds.slice(Math.min(e.startIndex, e.endIndex) + 1)
@@ -103,8 +95,8 @@ export class Route {
     this.edges.push(edge)
     const edgeMinIndex = Math.min(edge.startIndex, edge.endIndex)
     const edgeMaxIndex = Math.max(edge.startIndex, edge.endIndex)
-    edge.line.stationIds.slice(edgeMinIndex, edgeMaxIndex+1).forEach(stationId => {
-      this.routedStations[stationId] = this.routedStations[stationId]===undefined? 1 : 2
+    edge.line.stationIds.slice(edgeMinIndex, edgeMaxIndex + 1).forEach(stationId => {
+      this.routedStations[stationId] = this.routedStations[stationId] === undefined ? 1 : 2
     })
     if (edge.line.mapZairai.length > 0) {
       const edgeStartIndex = Math.min(edge.startIndex, edge.endIndex)
@@ -124,7 +116,7 @@ export class Route {
             end: data.stations[endStationId],
             direction: Direction.DOWN
           }
-          unroutableEdge.line.stationIds.slice(edgeMinIndex, edgeMaxIndex+1).forEach(stationId => {
+          unroutableEdge.line.stationIds.slice(edgeMinIndex, edgeMaxIndex + 1).forEach(stationId => {
             this.routedStations[stationId] = 1
           })
           this.unroutableEdges.push(unroutableEdge)
