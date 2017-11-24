@@ -53,7 +53,6 @@ export class Route {
       return []
     }
     const line = data.lines[lineId]
-    
     let ngStationIds: number[] = [stationId]
     // 一度来たことのある駅からこれ以上移動はできない
     if (this.routedStations[stationId] === 2) {
@@ -162,7 +161,7 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
   )
   const lines = Object.keys(lineTemp)
     .map(id => ~~id)
-    .filter(id => lineTemp[id] === 1)
+    .filter(id => lineTemp[id] === 1 && id !== lineIndex)
   return {
     stations: stations,
     lines: lines
