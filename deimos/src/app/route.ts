@@ -54,9 +54,9 @@ export class Route {
       .filter(e => e.line.id === lineId)
       .map(e => {
         if (stationIndex <= e.startIndex && stationIndex <= e.endIndex) {
-          return e.line.stationIds.slice(Math.min(e.startIndex, e.endIndex))
+          return e.line.stationIds.slice(Math.min(e.startIndex, e.endIndex) + 1)
         } else {
-          return e.line.stationIds.slice(0, Math.max(e.startIndex, e.endIndex) + 1)
+          return e.line.stationIds.slice(0, Math.max(e.startIndex, e.endIndex))
         }
       })
       .reduce((a, b) => a.concat(b), [])
