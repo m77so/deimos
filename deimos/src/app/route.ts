@@ -1,6 +1,7 @@
 import { RouteState } from './module'
 import { Line, Station } from './dataInterface'
 import { data } from './data'
+import { pregQuote } from './util'
 interface NextPops {
   stations: number[]
   lines: number[]
@@ -148,7 +149,6 @@ export const textFunction = (
     .replace(/^\s+/g, '')
     .replace(/\s+/g, ' ')
     .split(' ')
-
   let next: NextPops = {
     stations: [2],
     lines: [2]
@@ -339,7 +339,7 @@ export const textFunction = (
         .filter(staId => data.stations[staId].kana.match(prefix) !== null)
         .map(lineId => data.stationNames[lineId])
     } else {
-      prefix = new RegExp(`^${word}`)
+      prefix = new RegExp(`^${pregQuote(word)}`)
       state.completionLine = next.lines
         .filter(lineId => data.lines[lineId].name.match(prefix) !== null)
         .map(lineId => data.lineNames[lineId])
