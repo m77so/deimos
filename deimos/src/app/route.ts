@@ -134,10 +134,18 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
   const ngStations = srcStation !== undefined ? route.ngStations(lineIndex, srcStation.id) : []
   const stations = rail.stationIds.filter(id => !ngStations.includes(id))
   let lineTemp: { [key: number]: number } = {}
-  rail.dupLineStationIds
-    .filter(id => !ngStations.includes(id))
-    .forEach(id => data.stations[id].lineIds.forEach(lineId => (lineTemp[lineId] = 1)))
-  const lines = Object.keys(lineTemp).map(id => ~~id)
+  rail.dupLineStationIds.filter(id => !ngStations.includes(id)).forEach(id =>
+    data.stations[id].lineIds.forEach(lineId => {
+      if (lineTemp[lineId] === undefined) {
+        lineTemp[lineId] = 1
+      } else {
+        lineTemp[lineId] += 1
+      }
+    })
+  )
+  const lines = Object.keys(lineTemp)
+    .map(id => ~~id)
+    .filter(id => lineTemp[id] === 1)
   return {
     stations: stations,
     lines: lines
@@ -290,7 +298,7 @@ export const textFunction = (
       }
       // 駅　路線　駅
       // 駅　駅
-      // 駅　路線　路線 ←未対応
+
       if (route.stations.length >= 2) {
         if (textRoute[textRoute.length - 2].type === RouteNodeType.LINE) {
           // 駅　路線　駅　となる場合
@@ -331,6 +339,33 @@ export const textFunction = (
             direction: direction
           })
         }
+      }
+    } else if (type === RouteNodeType.LINE) {
+      if (textRoute[textRoute.length - 2].type === RouteNodeType.LINE) {
+        // 駅　路線　路線
+        console.log(lineId)
+        const middleStations = next.stations.filter(id => data.stations[id].lineIds.includes(lineId))
+
+        const middleStationId = middleStations[0]
+        route.stations.push(data.stations[middleStationId])
+        console.log(middleStations, route)
+        const startStationId = route.stations[route.stations.length - 2].id
+        const endStationId = route.stations[route.stations.length - 1].id
+        const start = data.stations[startStationId]
+        const end = data.stations[endStationId]
+        const lines = start.lineIds.filter(id => end.lineIds.includes(id))
+        const line: Line = data.lines[lines[0]]
+        const startLineStationId = line.stationIds.indexOf(startStationId)
+        const endLineStationId = line.stationIds.indexOf(endStationId)
+        const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
+        route.pushEdge({
+          line: line,
+          start: start,
+          end: end,
+          startIndex: startLineStationId,
+          endIndex: endLineStationId,
+          direction: direction
+        })
       }
     }
     if (type === RouteNodeType.STATION) {
