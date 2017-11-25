@@ -8,10 +8,11 @@ JRの運賃計算をしたい.
 1. `data`を見て
 2. `deimos`で`(npm|yarn) run start`
 
+もしくは https://m77.pw/deimos/ で公開しています
 # 旅規実装状況
 
- ## 第3章　旅客運賃・料金
- ### 第1節　通則
+## 第3章　旅客運賃・料金
+### 第1節　通則
 | 番号       | 概要                     | 対応状況     |
 |------------|--------------------------------|------|
 | 65条       | 運賃の種類                     |      |
@@ -60,3 +61,18 @@ JRの運賃計算をしたい.
 | 92条       | 学割                           | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
 | 93条       | 被救護者割引                   | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
 | 94条       | 往復割引                       | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+
+
+## 第4章　乗車券類の効力
+### 第2節　乗車券の効力
+| 番号       | 概要                     | 対応状況     |
+|------------|--------------------------------|------|
+| 154条 | 有効期間 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 155条 | 継続乗車 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 156条 | 途中下車・大都市近郊区間 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 157条 | 選択乗車 |  ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 157条2項 | 大都市近郊区間内相互発着 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 158条 | 特定区間における迂回乗車 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 159条 | 特定区間を通過する場合の迂回乗車 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 160条 | 特定区間発着の場合の迂回乗車 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+
