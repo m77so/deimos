@@ -467,10 +467,10 @@ export const textFunction = (
       }
     }
   }
-  state.duplicatedKomaru = false
+  state.duplicatedKomaru = []
   for (let n of textRoute) {
     if (n.type === RouteNodeType.DUPLICATED) {
-      state.duplicatedKomaru = true
+      state.duplicatedKomaru.push(n.value.name)
       break
     }
   }

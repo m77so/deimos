@@ -88,9 +88,15 @@ export class App extends React.Component<Props, {}> {
           value={this.props.value.text}
           onChange={event => this.props.actions.changeText(event.target.value)}
         />
-        {this.props.value.duplicatedKomaru ? (
+        {this.props.value.duplicatedKomaru.length > 0 ? (
           <div>
-            路線名と駅名で同じ名前のやつがあると判定するのがめんどくさいので，駅なら末尾にsか駅，路線なら末尾にlをつけてください．そのうち頑張って実装します．
+            {this.props.value.duplicatedKomaru[0]}は駅ですか？路線ですか？駅なら末尾にsか駅，路線なら末尾にlをつけてください．<br />
+            <button onClick={event => this.props.actions.changeText(this.props.value.text + '駅')}>
+              これは駅です
+            </button>
+            <button onClick={event => this.props.actions.changeText(this.props.value.text + 'l')}>
+              これは路線です
+            </button>
           </div>
         ) : (
           ''
@@ -99,10 +105,18 @@ export class App extends React.Component<Props, {}> {
           ほかん
           <ul className="completion">
             {this.props.value.completionLine.slice(0, 30).map(str => {
-              return <li key={str + '線'} onClick={event => this.props.actions.setNextPop(true, str)}>路線：{str}</li>
+              return (
+                <li key={str + '線'} onClick={event => this.props.actions.setNextPop(true, str)}>
+                  路線：{str}
+                </li>
+              )
             })}
             {this.props.value.completionStation.slice(0, 300).map(str => {
-              return <li key={'s' + str} onClick={event => this.props.actions.setNextPop(false, str)}>{str}</li>
+              return (
+                <li key={'s' + str} onClick={event => this.props.actions.setNextPop(false, str)}>
+                  {str}
+                </li>
+              )
             })}
           </ul>
         </div>

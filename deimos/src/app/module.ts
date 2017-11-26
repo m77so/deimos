@@ -34,7 +34,7 @@ export interface RouteState {
   completionStation: string[] // 補完リスト・駅名
   completionLine: string[] // 補完リスト・路線名
   lastInputHalfway: boolean // 最後の要素が入力中途か判定　補完ボタンを押した時に除去するかどうか
-  duplicatedKomaru: boolean // 駅か路線かわからなくて困った時
+  duplicatedKomaru: string[] // 駅か路線かわからなくて困った時
   route: Route // 経路
   fare: FareResponse // 運賃
 }
@@ -45,7 +45,7 @@ const initialState: RouteState = {
   source: '',
   destination: '',
   text: '',
-  duplicatedKomaru: false,
+  duplicatedKomaru: [],
   completionLine: [],
   completionStation: [],
   lastInputHalfway: false,
