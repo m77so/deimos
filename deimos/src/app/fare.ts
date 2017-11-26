@@ -220,33 +220,18 @@ export const fare = (route: Route): FareResponse => {
     const honshuCompanyLength = Object.keys(edgeCompany).filter(c =>
       [Companies.JRE, Companies.JRC, Companies.JRW].includes(+c)
     ).length
+    let sandoIndex = -1
+    const sandoKansens = [calcType.HokkaidoKansen, calcType.ShikokuKansen, calcType.KyushuKansen]
+    const sandoChihos = [calcType.HokkaidoChiho, calcType.ShikokuChiho, calcType.KyushuChiho]
     if (honshuCompanyLength === 0 && sandoCompanyLength === 1) {
       const comp = +Object.keys(edgeCompany)[0]
-      if (comp === Companies.JRH) {
-        if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
-          [totalFare, calcTypeUsed] = calc(totalKm, calcType.HokkaidoChiho)
-        } else {
-          [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HokkaidoKansen)
-        }
-      } else if (comp === Companies.JRS) {
-        if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
-          [totalFare, calcTypeUsed] = calc(totalKm, calcType.ShikokuChiho)
-        } else {
-          [totalFare, calcTypeUsed] = calc(totalAkm, calcType.ShikokuKansen)
-        }
-      } else if (comp === Companies.JRQ) {
-        if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
-          [totalFare, calcTypeUsed] = calc(totalKm, calcType.KyushuChiho)
-        } else {
-          [totalFare, calcTypeUsed] = calc(totalAkm, calcType.KyushuKansen)
-        }
-      }
+      const sandoCompanies = [Companies.JRH, Companies.JRS, Companies.JRQ]
+      sandoIndex = sandoCompanies.indexOf(comp)
+    }
+    if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
+      [totalFare, calcTypeUsed] = calc(totalKm, sandoIndex < 0 ? calcType.HondoChiho : sandoChihos[sandoIndex])
     } else {
-      if (onlyChihoFlag || (totalKm <= 100 && includeChihoFlag)) {
-        [totalFare, calcTypeUsed] = calc(totalKm, calcType.HondoChiho)
-      } else {
-        [totalFare, calcTypeUsed] = calc(totalAkm, calcType.HondoKansen)
-      }
+      [totalFare, calcTypeUsed] = calc(totalAkm, sandoIndex < 0 ? calcType.HondoKansen : sandoKansens[sandoIndex])
     }
   }
 
