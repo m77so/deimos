@@ -260,21 +260,15 @@ export default function textFunction(
     let prefix: RegExp
     if (match !== null) {
       prefix = new RegExp(`^${match[0]}`)
-      state.completionLine = next.lines
-        .filter(lineId => data.lines[lineId].kana.match(prefix) !== null)
-        .map(lineId => data.lineNames[lineId])
-      state.completionStation = next.stations
-        .filter(staId => data.stations[staId].kana.match(prefix) !== null)
-        .map(lineId => data.stationNames[lineId])
     } else {
       prefix = new RegExp(`^${pregQuote(word)}`)
-      state.completionLine = next.lines
-        .filter(lineId => data.lines[lineId].name.match(prefix) !== null)
-        .map(lineId => data.lineNames[lineId])
-      state.completionStation = next.stations
-        .filter(staId => data.stations[staId].name.match(prefix) !== null)
-        .map(lineId => data.stationNames[lineId])
     }
+    state.completionLine = next.lines
+      .filter(lineId => data.lines[lineId].kana.match(prefix) !== null)
+      .map(lineId => data.lineNames[lineId])
+    state.completionStation = next.stations
+      .filter(staId => data.stations[staId].kana.match(prefix) !== null)
+      .map(lineId => data.stationNames[lineId])
     state.lastInputHalfway = true
   } else {
     state.completionLine = next.lines.map(lineId => data.lineNames[lineId])
