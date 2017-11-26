@@ -285,6 +285,5 @@ export default function textFunction(
   state.destination = route.stations.length > 1 ? route.stations[route.stations.length - 1].name : ''
   state.route = route
   state.text = words.join(' ')
-  console.log(state)
   return state
 }

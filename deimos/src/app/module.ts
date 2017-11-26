@@ -42,7 +42,7 @@ export interface RouteState {
 
 export type RouteActions = TextAction | NextAction
 
-const initialState: RouteState = {
+export const initialState: RouteState = {
   source: '',
   destination: '',
   text: '',
