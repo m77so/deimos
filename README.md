@@ -1,3 +1,5 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/26bb6e719bf4b4a32b97/maintainability)](https://codeclimate.com/github/m77so/deimos/maintainability)
+
 # これなに
 JRの運賃計算をしたい.
 
@@ -6,6 +8,7 @@ JRの運賃計算をしたい.
 
 # 使い方
 1. `data`を見て
+2. `deimos`で`(npm|yarn) install`
 2. `deimos`で`(npm|yarn) run start`
 
 もしくは https://m77.pw/deimos/ で公開しています
