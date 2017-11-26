@@ -6,6 +6,7 @@ JRの運賃計算をしたい.
 
 # 使い方
 1. `data`を見て
+2. `deimos`で`(npm|yarn) install`
 2. `deimos`で`(npm|yarn) run start`
 
 もしくは https://m77.pw/deimos/ で公開しています
