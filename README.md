@@ -71,8 +71,8 @@ JRの運賃計算をしたい.
 | 番号       | 概要                     | 対応状況     |
 |------------|--------------------------------|------|
 | 154条 | 有効期間 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
-| 155条 | 継続乗車 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
-| 156条 | 途中下車・大都市近郊区間 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 155条 | 継続乗車 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
+| 156条 | 途中下車・大都市近郊区間 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
 | 157条 | 選択乗車 |  ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
 | 157条2項 | 大都市近郊区間内相互発着 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
 | 158条 | 特定区間における迂回乗車 | ![未実装](https://img.shields.io/badge/%E5%AE%9F%E8%A3%85-%E6%9C%AA%E5%AE%9F%E8%A3%85-red.svg)   |
