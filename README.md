@@ -13,7 +13,7 @@ JRの運賃計算をしたい.
 
 もしくは https://m77.pw/deimos/ で公開しています
 # 旅規実装状況
-
+旅規　http://railway.jr-central.co.jp/ticket-rule/cjr-regulation/
 ## 第3章　旅客運賃・料金
 ### 第1節　通則
 | 番号       | 概要                     | 対応状況     |
