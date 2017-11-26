@@ -1,3 +1,5 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/26bb6e719bf4b4a32b97/maintainability)](https://codeclimate.com/github/m77so/deimos/maintainability)
+
 # これなに
 JRの運賃計算をしたい.
 
