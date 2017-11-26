@@ -66,12 +66,52 @@ const nextPopsStation = (stationId: number, route: Route): NextPops => {
     lines: lines
   }
 }
+interface DetectWordTypeInterface {
+  type: RouteNodeType | null
+  stationId: number
+  lineId: number
+}
+const detectWordType = (
+  word: string,
+  next: NextPops,
+  lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED
+): DetectWordTypeInterface => {
+  const stationId = data.stationNames.indexOf(word)
+  const lineId = data.lineNames.indexOf(word)
+  const stationFlag = next.stations.includes(stationId)
+  const lineFlag = next.lines.includes(lineId)
+  const suffix = word.slice(-1) || ''
+  if (specialSuffix.indexOf(suffix) > -1) {
+    word = word.slice(0, -1)
+  }
+  let type = stationFlag
+    ? lineFlag ? RouteNodeType.DUPLICATED : RouteNodeType.STATION
+    : lineFlag ? RouteNodeType.LINE : null
+  if (type === RouteNodeType.DUPLICATED) {
+    if (lastNodeType !== RouteNodeType.DUPLICATED) {
+      type = lastNodeType
+      if (lastNodeType === RouteNodeType.LINE) {
+        word += 'L'
+      } else {
+        word += '駅'
+      }
+    } else {
+      type =
+        'SsＳｓ駅'.indexOf(suffix) > -1
+          ? RouteNodeType.STATION
+          : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
+    }
+  }
+  return { type: type, stationId: stationId, lineId: lineId }
+}
 const unique = function() {
   let seen = {}
   return function(element: number) {
     return !(element in seen) && (seen[element] = 1)
   }
 }
+const specialSuffix = 'SsＳｓ駅LlＬｌ'
+
 export default function textFunction(
   state: RouteState,
   text: string,
@@ -97,6 +137,7 @@ export default function textFunction(
       return state
     }
   }
+  // nextの初期化　最初は全ての可能性がある
   for (let i = 0, l = data.stations.length; i < l; ++i) {
     next.stations[i] = i
   }
@@ -107,42 +148,14 @@ export default function textFunction(
   let textRoute: TextRouteNode[] = [] // TextBoxのWord分割したもの　Wordに意味を与える
   let route: Route = new Route()
   let sourceStation: Station | null = null
-  const specialSuffix = 'SsＳｓ駅LlＬｌ'
-  let type: RouteNodeType | null = null
+  let typeLast: RouteNodeType | null = null
   for (let i = 0; i < words.length; ++i) {
     let word = words[i]
     if (word === '' || specialSuffix.indexOf(word) > -1) {
       break
     }
-    const suffix = word.slice(-1) || ''
-    if (specialSuffix.indexOf(suffix) > -1) {
-      word = word.slice(0, -1)
-    }
-
-    const stationId = data.stationNames.indexOf(word)
-    const lineId = data.lineNames.indexOf(word)
-    const stationFlag = next.stations.includes(stationId)
-    const lineFlag = next.lines.includes(lineId)
-
-    type = stationFlag
-      ? lineFlag ? RouteNodeType.DUPLICATED : RouteNodeType.STATION
-      : lineFlag ? RouteNodeType.LINE : null
-
-    if (type === RouteNodeType.DUPLICATED) {
-      if (i === words.length - 1 && lastNodeType !== RouteNodeType.DUPLICATED) {
-        type = lastNodeType
-        if (lastNodeType === RouteNodeType.LINE) {
-          words[i] += 'L'
-        } else {
-          words[i] += '駅'
-        }
-      } else {
-        type =
-          'SsＳｓ駅'.indexOf(suffix) > -1
-            ? RouteNodeType.STATION
-            : 'LlＬｌ'.indexOf(suffix) > -1 ? RouteNodeType.LINE : type
-      }
-    }
+    let { type, stationId, lineId } = detectWordType(word, next, i === words.length - 1 ? lastNodeType : undefined)
+    typeLast = type
     if (sourceStation === null && type !== null) {
       if (textRoute.length === 0) {
         if (type === RouteNodeType.STATION) {
@@ -238,7 +251,8 @@ export default function textFunction(
       next.lines = nextFromStation.lines.concat(nextFromLine.lines).filter(unique())
       next.stations = nextFromStation.stations.concat(nextFromLine.stations).filter(unique())
     }
-    if (stationFlag) {
+    // 次の候補駅に今の駅があったら除去する
+    if (stationId > -1) {
       for (let ii = 0, j = next.stations.length; ii < j; ++ii) {
         if (next.stations[ii] === stationId) {
           next.stations.splice(ii, 1)
@@ -254,7 +268,7 @@ export default function textFunction(
       break
     }
   }
-  if (type === null && words.length > 0) {
+  if (typeLast === null && words.length > 0) {
     const word = words[words.length - 1]
     const match = word.match(/^[\u3040-\u309F]+/)
     let prefix: RegExp
