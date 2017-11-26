@@ -56,7 +56,7 @@ const output: OutputJSON = {
   lines: [],
   stations: []
 }
-const dataSD = fs.readFileSync('./resource/mars_sd.dat')
+const dataSD = fs.readFileSync('./resource/MARS_SD.DAT')
 /**
  * 半角カタカナを全角ひらがなに変換
  * https://qiita.com/hrdaya/items/291276a5a20971592216
@@ -154,7 +154,7 @@ for (let r = 0; r < recordsNumSD; ++r) {
   }
 }
 
-const dataNN = fs.readFileSync('./resource/mars_nn.dat')
+const dataNN = fs.readFileSync('./resource/MARS_NN.DAT')
 const recordsNum = dataNN.length / 8
 
 for (let r = 0; r < recordsNum; ++r) {
