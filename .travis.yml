@@ -1,0 +1,17 @@
+language: node_js
+
+node_js:
+  - 'stable'
+  - '8'
+
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - cd deimos
+install:
+  - npm install
+
+before_script:
+  - export CI=false
