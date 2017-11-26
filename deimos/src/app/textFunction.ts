@@ -22,11 +22,7 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
   let lineTemp: { [key: number]: number } = {}
   rail.dupLineStationIds.filter(id => !ngStations.includes(id)).forEach(id =>
     data.stations[id].lineIds.forEach(lineId => {
-      if (lineTemp[lineId] === undefined) {
-        lineTemp[lineId] = 1
-      } else {
-        lineTemp[lineId] += 1
-      }
+      lineTemp[lineId] = lineTemp[lineId] === undefined ? 1 : lineTemp[lineId] + 1
     })
   )
   const lines = Object.keys(lineTemp)
@@ -48,7 +44,6 @@ const nextPopsStation = (stationId: number, route: Route): NextPops => {
     return nullNextPops
   }
   let stationTemp: { [key: number]: number[] } = {}
-
   station.lineIds.forEach(lineId => {
     const ngStations = route.ngStations(lineId, stationId)
     data.lines[lineId].stationIds.forEach(st => {
@@ -61,11 +56,9 @@ const nextPopsStation = (stationId: number, route: Route): NextPops => {
       stationTemp[st].push(lineId)
     })
   })
-
   const lines = station.lineIds.filter(
     id => route.ngStations(id, station.id).length < data.lines[id].stationIds.length // 遷移先からまだ移動できること
   )
-
   const stations = Object.keys(stationTemp).map(id => ~~id)
   return {
     stations: stations,
