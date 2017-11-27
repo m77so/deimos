@@ -42,15 +42,12 @@ const hankana2zenkana = function (str: string) {
       'ｧ': 'ぁ', 'ｨ': 'ぃ', 'ｩ': 'ぅ', 'ｪ': 'ぇ', 'ｫ': 'ぉ',
       'ｯ': 'っ', 'ｬ': 'ゃ', 'ｭ': 'ゅ', 'ｮ': 'ょ',
       '｡': '。', '､': '、', 'ｰ': 'ー', '｢': '「', '｣': '」', '･': '・'
-  };
-
-  const reg = new RegExp('(' + Object.keys(kanaMap).join('|') + ')', 'g');
+  }
+  const reg = new RegExp('(' + Object.keys(kanaMap).join('|') + ')', 'g')
   return str
-          .replace(reg, function (match) {
-              return kanaMap[match];
-          })
-          .replace(/ﾞ/g, '゛')
-          .replace(/ﾟ/g, '゜');
+    .replace(reg, match => kanaMap[match])
+    .replace(/ﾞ/g, '゛')
+    .replace(/ﾟ/g, '゜')
 };
 const recordsNumSD = dataSD.length / 28
 for (let r = 0; r < recordsNumSD; ++r) {
@@ -189,37 +186,39 @@ for( let companyName of Object.keys(companyJSONData)){
   output.lineNames.forEach((lineName,lineId) =>{
     let line = output.lines[lineId]
     for(let i=0;i<c.entire.length;++i){
-      if (lineName.indexOf(c.entire[i])===0){
-        output.lines[lineId].company.push(companyCode)
-        output.lines[lineId].stationIds.forEach(stationId=>{
+      if (lineName.indexOf(c.entire[i])!==0){
+        continue
+      }
+      output.lines[lineId].company.push(companyCode)
+      output.lines[lineId].stationIds.forEach(stationId=>{
+        let companyList = output.stations[stationId].company
+        if(!companyList.includes(companyCode)){
+          companyList.push(companyCode)
+        }
+      })
+      return 
+    }
+    for(let partialLineName of Object.keys(c.partial)) {
+      if(lineName.indexOf(partialLineName)!==0){
+        continue
+      }
+      for(let i=0; i<c.partial[partialLineName].length/2; ++i){
+        let startIndex = line.stations.indexOf(c.partial[partialLineName][i*2])
+        let endIndex = line.stations.indexOf(c.partial[partialLineName][i*2+1])
+        ; [startIndex, endIndex] = [Math.min(startIndex,endIndex), Math.max(startIndex,endIndex)]
+        if (startIndex<0 || endIndex<0){
+          continue
+        }
+        for(let index=startIndex;index<=endIndex;++index){
+          line.company[index] = companyCode
+        }
+        const stationIds = line.stationIds.slice(startIndex,endIndex+1)
+        stationIds.forEach(stationId=>{
           let companyList = output.stations[stationId].company
           if(!companyList.includes(companyCode)){
             companyList.push(companyCode)
           }
         })
-        return
-      }
-    }
-    for(let partialLineName of Object.keys(c.partial)) {
-      if(lineName.indexOf(partialLineName)===0){
-        for(let i=0; i<c.partial[partialLineName].length/2; ++i){
-          let startIndex = line.stations.indexOf(c.partial[partialLineName][i*2])
-          let endIndex = line.stations.indexOf(c.partial[partialLineName][i*2+1])
-          ; [startIndex, endIndex] = [Math.min(startIndex,endIndex), Math.max(startIndex,endIndex)]
-          if (startIndex<0 || endIndex<0){
-            continue
-          }
-          for(let index=startIndex;index<=endIndex;++index){
-            line.company[index] = companyCode
-          }
-          const stationIds = line.stationIds.slice(startIndex,endIndex+1)
-          stationIds.forEach(stationId=>{
-            let companyList = output.stations[stationId].company
-            if(!companyList.includes(companyCode)){
-              companyList.push(companyCode)
-            }
-          })
-        }
       }
     }
     if(line.company.length<1){
@@ -239,19 +238,14 @@ const shinzais: ShinzaiInterface[] = Object.assign([],dataShinzai)
 for(let shinzai of shinzais){
   const shin = output.lines[output.lineNames.indexOf(shinzai.line2)]
   const zai = output.lines[output.lineNames.indexOf(shinzai.line1)]
-  let startIndex = shin.stations.indexOf(shinzai.src)
-  let endIndex = shin.stations.indexOf(shinzai.dest)
-  shin.mapZairai.push({
-    startIndex: Math.min(startIndex,endIndex),
-    endIndex: Math.max(startIndex,endIndex),
-    targetLine: zai.id
-  })
-  startIndex = zai.stations.indexOf(shinzai.src)
-  endIndex = zai.stations.indexOf(shinzai.dest)
-  zai.mapZairai.push({
-    startIndex: Math.min(startIndex,endIndex),
-    endIndex: Math.max(startIndex,endIndex),
-    targetLine: shin.id
+  ;[[shin,zai],[zai,shin]].forEach((lines)=>{
+    let startIndex = lines[0].stations.indexOf(shinzai.src)
+    let endIndex = lines[0].stations.indexOf(shinzai.dest)
+    lines[0].mapZairai.push({
+      startIndex: Math.min(startIndex,endIndex),
+      endIndex: Math.max(startIndex,endIndex),
+      targetLine: lines[1].id
+    })
   })
 }
 console.log(
