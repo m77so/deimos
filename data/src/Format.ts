@@ -1,54 +1,14 @@
-import { start } from 'repl';
-import * as fs from 'fs';
-import * as iconv from 'iconv-lite';
-export interface MapZairai{
-  startIndex: number
-  endIndex: number
-  targetLine: number
-}
-export interface Line {
-  id: number
-  name: string
-  kana: string
-  src: string
-  dest: string
-  stations: Array<string>
-  stationIds: Array<number>
-  kms: Array<number>
-  akms: Array<number>
-  dupLineStationIds: Array<number>
-  chiho: boolean
-  company: number[]
-  mapZairai: MapZairai[]
-}
-export interface Station {
-  id: number
-  name: string
-  kana: string
-  lineIds: Array<number>
-  company: number[]
-}
-export interface OutputJSON {
-  lineNames: Array<string>
-  stationNames: Array<string>
-  lines: Array<Line>
-  stations: Array<Station>
-}
-export enum Companies{
-  JRH,
-  JRE,
-  JRC,
-  JRW,
-  JRS,
-  JRQ
-}
-const companyHash: {[key:string]: Companies} = {
-  "JR北": Companies.JRH,
-  "JR東": Companies.JRE,
-  "JR海": Companies.JRC,
-  "JR西": Companies.JRW,
-  "JR四": Companies.JRS,
-  "JR九": Companies.JRQ
+import { start } from 'repl'
+import * as fs from 'fs'
+import * as iconv from 'iconv-lite'
+import { MapZairai, Line, Station, OutputJSON, Companies } from './dataInterface'
+const companyHash: { [key: string]: Companies } = {
+  JR北: Companies.JRH,
+  JR東: Companies.JRE,
+  JR海: Companies.JRC,
+  JR西: Companies.JRW,
+  JR四: Companies.JRS,
+  JR九: Companies.JRQ
 }
 const output: OutputJSON = {
   lineNames: [],

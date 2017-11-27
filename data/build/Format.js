@@ -2,22 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const iconv = require("iconv-lite");
-var Companies;
-(function (Companies) {
-    Companies[Companies["JRH"] = 0] = "JRH";
-    Companies[Companies["JRE"] = 1] = "JRE";
-    Companies[Companies["JRC"] = 2] = "JRC";
-    Companies[Companies["JRW"] = 3] = "JRW";
-    Companies[Companies["JRS"] = 4] = "JRS";
-    Companies[Companies["JRQ"] = 5] = "JRQ";
-})(Companies = exports.Companies || (exports.Companies = {}));
+const dataInterface_1 = require("./dataInterface");
 const companyHash = {
-    "JR北": Companies.JRH,
-    "JR東": Companies.JRE,
-    "JR海": Companies.JRC,
-    "JR西": Companies.JRW,
-    "JR四": Companies.JRS,
-    "JR九": Companies.JRQ
+    JR北: dataInterface_1.Companies.JRH,
+    JR東: dataInterface_1.Companies.JRE,
+    JR海: dataInterface_1.Companies.JRC,
+    JR西: dataInterface_1.Companies.JRW,
+    JR四: dataInterface_1.Companies.JRS,
+    JR九: dataInterface_1.Companies.JRQ
 };
 const output = {
     lineNames: [],
