@@ -14,7 +14,8 @@ const output: OutputJSON = {
   lineNames: [],
   stationNames: [],
   lines: [],
-  stations: []
+  stations: [],
+  cities: []
 }
 const dataSD = fs.readFileSync('./resource/MARS_SD.DAT')
 /**
@@ -100,7 +101,8 @@ for (let r = 0; r < recordsNumSD; ++r) {
         name: record[3],
         kana: hankana2zenkana( record[4]),
         lineIds: [record[0]],
-        company: []
+        company: [],
+        city: -1
       })
       output.stationNames.push(record[3])
     }
@@ -246,6 +248,61 @@ for(let shinzai of shinzais){
       endIndex: Math.max(startIndex,endIndex),
       targetLine: lines[1].id
     })
+  })
+}
+
+const dataCity = JSON.parse(fs.readFileSync('./resource/city.json', 'utf8'))
+interface cityInterface {
+  center: string, // 代表駅
+  origin: string, // 市域を判定する時の中心駅
+  border: string[], // 市域を判定するときの境界駅
+  additional: string[], // 市域を判定する時のエリアに含まれない追加の駅
+  reduce: string[] // 除去する駅
+}
+const cities : {[key:string]:cityInterface} = Object.assign({},dataCity)
+for(let cityAreaName of Object.keys(cities)){
+  const cityArea = cities[cityAreaName]
+  const cityStationIds = [output.stationNames.indexOf(cityArea.origin)]
+  const sourcedList: number[] = []
+  let i = 0
+  while(cityStationIds.length>sourcedList.length){
+    const srcStationId = cityStationIds[i++]
+    const srcStation = output.stations[srcStationId]
+    sourcedList.push(srcStationId)
+    if(cityArea.border.includes(srcStation.name)){
+      continue
+    }
+    srcStation.lineIds.forEach(lineId=>{
+      if(output.lines[lineId].shinkansen){
+        return
+      }
+      const lineStationIds = output.lines[lineId].stationIds
+      const lineIndex = lineStationIds.indexOf(srcStationId)
+      ;[1,-1].forEach(diff=>{
+        const newLineIndex = diff+lineIndex
+        if(sourcedList.includes(lineStationIds[newLineIndex])||newLineIndex<0||lineStationIds.length<=newLineIndex){
+          return
+        }
+        const additionalStation = output.stations[lineStationIds[newLineIndex]]
+        if(cityStationIds.includes(additionalStation.id)){
+          return
+        }
+        cityStationIds.push(additionalStation.id)
+      })
+    })
+  }
+  cityArea.reduce.forEach(name=>{
+    cityStationIds.splice(cityStationIds.indexOf(output.stationNames.indexOf(name)),1)
+  })
+  const cityId =  output.cities.length
+  output.cities.push({
+    id: cityId,
+    name: cityAreaName,
+    centralStationId: output.stationNames.indexOf(cityArea.center),
+    cityStationIds: cityStationIds
+  })
+  cityStationIds.forEach(stationId=>{
+    output.stations[stationId].city = cityId
   })
 }
 console.log(
