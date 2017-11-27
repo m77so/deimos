@@ -77,6 +77,7 @@ for (let r = 0; r < recordsNumSD; ++r) {
             akms: [],
             dupLineStationIds: [],
             chiho: false,
+            shinkansen: record[3].indexOf('新幹線') > -1,
             company: [],
             mapZairai: []
         };
@@ -152,6 +153,7 @@ output.lines[0] = {
     src: '',
     dest: '',
     chiho: false,
+    shinkansen: false,
     company: [],
     mapZairai: []
 };

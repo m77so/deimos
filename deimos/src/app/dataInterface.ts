@@ -15,6 +15,7 @@ export interface Line {
   akms: Array<number>
   dupLineStationIds: Array<number>
   chiho: boolean
+  shinkansen: boolean
   company: number[]
   mapZairai: MapZairai[]
 }
