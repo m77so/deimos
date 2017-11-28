@@ -3,15 +3,33 @@
 # これなに
 JRの運賃計算をしたい.
 
+https://m77.pw/deimos/ で公開しています
 # 注意
 まだつかいものになりません
 
 # 使い方
-1. `data`を見て
-2. `deimos`で`(npm|yarn) install`
-2. `deimos`で`(npm|yarn) run start`
+1. `(npm|yarn) install`
+1. データを追加。詳細は`data`を見て
+2. `(npm|yarn) run start`
 
-もしくは https://m77.pw/deimos/ で公開しています
+This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
+
+### `(npm|yarn) start`
+
+Runs the app in the development mode.<br>
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+The page will reload if you make edits.<br>
+You will also see any lint errors in the console.
+
+### `(npm|yarn) test`
+
+Launches the test runner in the interactive watch mode.<br>
+### `(npm|yarn) run build`
+
+Builds the app for production to the `build` folder.<br>
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
 # 旅規実装状況
 旅規　http://railway.jr-central.co.jp/ticket-rule/cjr-regulation/
 ## 第3章　旅客運賃・料金
