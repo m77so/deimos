@@ -30,7 +30,7 @@ export const setNextPop = (line: boolean, text: string): NextAction => ({
 })
 export interface RouteState {
   source: string // 始発駅が入る　あんまり使ってない
-  destination: string // 着駅が入る　あんまり使ってない　
+  destination: string // 着駅が入る　あんまり使ってない
   text: string // 入力欄
   completionStation: string[] // 補完リスト・駅名
   completionLine: string[] // 補完リスト・路線名
@@ -59,19 +59,20 @@ export default function reducer(state: RouteState = initialState, action: RouteA
   switch (action.type) {
     case ActionNames.NEXT:
       copyState = textFunction(
-        copyState,
         state.text
           .replace(/^\s+|\s+$/g, '')
           .replace(/\s+/g, ' ')
           .split(' ')
-          .slice(0, state.lastInputHalfway ? -1 : 99999).concat(action.text)
+          .slice(0, state.lastInputHalfway ? -1 : 99999)
+          .concat(action.text)
           .join(' '),
+        copyState,
         action.line ? RouteNodeType.LINE : RouteNodeType.STATION
       )
       copyState.fare = fare(copyState.route)
       break
     case ActionNames.TEXT:
-      copyState = textFunction(copyState, action.text)
+      copyState = textFunction(action.text, copyState)
       copyState.fare = fare(copyState.route)
       break
     default:

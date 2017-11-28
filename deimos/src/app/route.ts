@@ -1,5 +1,6 @@
 import { Line, Station } from './dataInterface'
 import { data } from './data'
+import  textFunction  from './textFunction'
 export enum RouteNodeType {
   STATION,
   LINE,
@@ -28,11 +29,15 @@ export class Route {
   edges: RouteEdge[]
   unroutableEdges: RouteEdge[]
   routedStations: { [key: number]: number } // stationId をKeyとしてもつ　6の字，9の字用
-  constructor() {
+  constructor(text: string = '') {
     this.stations = []
     this.edges = []
     this.unroutableEdges = []
     this.routedStations = {}
+    if (text !== '') {
+      console.error('hoge')
+      // textFunction(text)
+    }
   }
 
   ngStations(lineId: number, stationId: number): number[] {

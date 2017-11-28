@@ -1,4 +1,4 @@
-import { RouteState } from './module'
+import { RouteState, initialState } from './module'
 import { Station } from './dataInterface'
 import { data } from './data'
 import { pregQuote } from './util'
@@ -113,8 +113,8 @@ const unique = function() {
 const specialSuffix = 'SsＳｓ駅LlＬｌ'
 
 export default function textFunction(
-  state: RouteState,
   text: string,
+  state: RouteState = initialState,
   lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED
 ): RouteState {
   const words = text
