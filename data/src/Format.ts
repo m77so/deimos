@@ -1,7 +1,7 @@
 import { start } from 'repl'
 import * as fs from 'fs'
 import * as iconv from 'iconv-lite'
-import { MapZairai, Line, Station, OutputJSON, Companies } from './dataInterface'
+import { MapZairai, Line, Station, OutputJSON, Companies } from '../../src/app/dataInterface'
 const companyHash: { [key: string]: Companies } = {
   JR北: Companies.JRH,
   JR東: Companies.JRE,

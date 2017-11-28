@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const iconv = require("iconv-lite");
-const dataInterface_1 = require("./dataInterface");
+const dataInterface_1 = require("../../src/app/dataInterface");
 const companyHash = {
     JR北: dataInterface_1.Companies.JRH,
     JR東: dataInterface_1.Companies.JRE,

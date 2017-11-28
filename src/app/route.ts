@@ -1,6 +1,5 @@
 import { Line, Station } from './dataInterface'
 import { data } from './data'
-import  textFunction  from './textFunction'
 export enum RouteNodeType {
   STATION,
   LINE,
