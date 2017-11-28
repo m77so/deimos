@@ -90,11 +90,7 @@ const detectWordType = (
   if (type === RouteNodeType.DUPLICATED) {
     if (lastNodeType !== RouteNodeType.DUPLICATED) {
       type = lastNodeType
-      if (lastNodeType === RouteNodeType.LINE) {
-        word += 'L'
-      } else {
-        word += '駅'
-      }
+      word += lastNodeType === RouteNodeType.LINE ? 'L' : '駅'
     } else {
       type =
         'SsＳｓ駅'.indexOf(suffix) > -1
