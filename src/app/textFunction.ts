@@ -4,7 +4,7 @@ import { data } from './data'
 import { pregQuote } from './util'
 import { Route, RouteNodeType, TextRouteNode } from './route'
 import shortestRoute from './shortestRoute'
-interface NextPops {
+export interface NextPops {
   stations: number[]
   lines: number[]
 }
@@ -112,11 +112,8 @@ export default function textFunction(
   text: string,
   state: RouteState = initialState,
   lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED
-): RouteState {
-  const words = text
-    .replace(/^\s+/g, '')
-    .replace(/\s+/g, ' ')
-    .split(' ')
+): Route {
+  const words = text.split(' ')
   let next: NextPops = {
     stations: [2],
     lines: [2]
@@ -126,11 +123,7 @@ export default function textFunction(
     const startIndex = data.stationNames.indexOf(words[0])
     const endIndex = data.stationNames.indexOf(words[2])
     if (startIndex > -1 && endIndex > -1) {
-      state.text = text
-      state.route = shortestRoute(data.stations[startIndex], data.stations[endIndex])
-      state.completionLine = []
-      state.completionStation = []
-      return state
+      return shortestRoute(data.stations[startIndex], data.stations[endIndex])
     }
   }
   // nextの初期化　最初は全ての可能性がある
