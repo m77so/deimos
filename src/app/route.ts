@@ -1,6 +1,6 @@
 import { Line, Station } from './dataInterface'
 import { data } from './data'
-import textFunction from './textFunction'
+import textFunction, { NextPops } from './textFunction'
 export enum RouteNodeType {
   STATION,
   LINE,
@@ -22,8 +22,13 @@ export class RouteEdge {
   endIndex: number
   start: Station
   end: Station
+  next: NextPops
   get direction(): Direction {
     return this.startIndex > this.endIndex ? Direction.UP : Direction.DOWN
+  }
+  constructor() {
+    this.next.lines = []
+    this.next.stations = []
   }
   fromStationId(startStationId: number, endStationId: number, lineId: number = -1): RouteEdge {
     this.start = data.stations[startStationId]
