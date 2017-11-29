@@ -55,27 +55,24 @@ export const initialState: RouteState = {
 }
 
 export default function reducer(state: RouteState = initialState, action: RouteActions): RouteState {
-  let copyState = Object.assign({}, state)
+  state.text = state.text.replace(/^\s+/g, '').replace(/\s+/g, ' ')
   switch (action.type) {
     case ActionNames.NEXT:
-      copyState = textFunction(
-        state.text
-          .replace(/^\s+|\s+$/g, '')
-          .replace(/\s+/g, ' ')
-          .split(' ')
-          .slice(0, state.lastInputHalfway ? -1 : 99999)
-          .concat(action.text)
-          .join(' '),
-        copyState,
-        action.line ? RouteNodeType.LINE : RouteNodeType.STATION
-      )
-      copyState.fare = fare(copyState.route)
+      state.text = state.lastInputHalfway
+        ? state.text
+            .split(' ')
+            .slice(0, -1)
+            .concat(action.text)
+            .join(' ')
+        : state.text
+      state.route = new Route(state.text, action.line ? RouteNodeType.LINE : RouteNodeType.STATION)
+      state.fare = fare(state.route)
       break
     case ActionNames.TEXT:
-      copyState = textFunction(action.text, copyState)
-      copyState.fare = fare(copyState.route)
+      state.route = new Route(action.text)
+      state.fare = fare(state.route)
       break
     default:
   }
-  return copyState
+  return state
 }
