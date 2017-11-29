@@ -1,5 +1,6 @@
 import { Line, Station } from './dataInterface'
 import { data } from './data'
+import textFunction from './textFunction'
 export enum RouteNodeType {
   STATION,
   LINE,
@@ -15,30 +16,52 @@ enum Direction {
   UP, // 上りを表す　キロ数が減る
   DOWN
 }
-export interface RouteEdge {
+export class RouteEdge {
   line: Line
-  direction: Direction
   startIndex: number
   endIndex: number
   start: Station
   end: Station
+  get direction(): Direction {
+    return this.startIndex > this.endIndex ? Direction.UP : Direction.DOWN
+  }
+  fromStationId(startStationId: number, endStationId: number, lineId: number = -1): RouteEdge {
+    this.start = data.stations[startStationId]
+    this.end = data.stations[endStationId]
+    lineId = lineId === -1 ? this.start.lineIds.filter(id => this.end.lineIds.includes(id))[0] : lineId
+    this.line = data.lines[lineId]
+    this.startIndex = this.line.stationIds.indexOf(startStationId)
+    this.endIndex = this.line.stationIds.indexOf(endStationId)
+    return this
+  }
+  fromLineIndex(startStationIndex: number, endStationIndex: number, lineId: number): RouteEdge {
+    this.startIndex = startStationIndex
+    this.endIndex = endStationIndex
+    this.line = data.lines[lineId]
+    this.start = data.stations[this.line.stationIds[this.startIndex]]
+    this.end = data.stations[this.line.stationIds[this.endIndex]]
+    return this
+  }
 }
+
 export class Route {
   stations: Station[]
   edges: RouteEdge[]
   unroutableEdges: RouteEdge[]
   routedStations: { [key: number]: number } // stationId をKeyとしてもつ　6の字，9の字用
-  constructor(text: string = '') {
+  constructor(text: string = '', lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
     this.stations = []
     this.edges = []
     this.unroutableEdges = []
     this.routedStations = {}
     if (text !== '') {
       console.error('hoge')
-      // textFunction(text)
+      this.textFunction(text, lastNodeType)
     }
   }
-
+  textFunction(text: string, lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
+    const res = textFunction(text, undefined, lastNodeType)
+  }
   ngStations(lineId: number, stationId: number): number[] {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?
     // stationIdsで返します．
@@ -85,23 +108,7 @@ export class Route {
       .reduce((a, b) => a.concat(b), ngStationIds)
   }
   pushEdge(startStationId: number, endStationId: number, lineId: number = -1) {
-    const start = data.stations[startStationId]
-    const end = data.stations[endStationId]
-    const lines = lineId === -1 ? start.lineIds.filter(id => end.lineIds.includes(id))[0] : lineId
-    const line: Line = data.lines[lines]
-    const startLineStationId = line.stationIds.indexOf(startStationId)
-    const endLineStationId = line.stationIds.indexOf(endStationId)
-    const direction = startLineStationId > endLineStationId ? Direction.UP : Direction.DOWN
-    this._pushEdge({
-      line: line,
-      start: start,
-      end: end,
-      startIndex: startLineStationId,
-      endIndex: endLineStationId,
-      direction: direction
-    })
-  }
-  private _pushEdge(edge: RouteEdge) {
+    const edge = new RouteEdge().fromStationId(startStationId, endStationId, lineId)
     this.edges.push(edge)
     const edgeMinIndex = Math.min(edge.startIndex, edge.endIndex)
     const edgeMaxIndex = Math.max(edge.startIndex, edge.endIndex)
@@ -115,17 +122,7 @@ export class Route {
         if (edgeStartIndex < zairai.endIndex && edgeEndIndex > zairai.startIndex) {
           const startIndex = Math.max(edgeStartIndex, zairai.startIndex)
           const endIndex = Math.min(edgeEndIndex, zairai.endIndex)
-          const startStationId = edge.line.stationIds[startIndex]
-          const endStationId = edge.line.stationIds[endIndex]
-          const targetLine = data.lines[zairai.targetLine]
-          const unroutableEdge: RouteEdge = {
-            line: targetLine,
-            startIndex: targetLine.stationIds.indexOf(startStationId),
-            endIndex: targetLine.stationIds.indexOf(endStationId),
-            start: data.stations[startStationId],
-            end: data.stations[endStationId],
-            direction: Direction.DOWN
-          }
+          const unroutableEdge: RouteEdge = new RouteEdge().fromLineIndex(startIndex, endIndex, zairai.targetLine)
           unroutableEdge.line.stationIds.slice(edgeMinIndex, edgeMaxIndex + 1).forEach(stationId => {
             this.routedStations[stationId] = 1
           })
