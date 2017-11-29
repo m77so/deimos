@@ -26,6 +26,7 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
       lineTemp[lineId] = lineTemp[lineId] === undefined ? 1 : lineTemp[lineId] + 1
     })
   )
+  console.log(lineIndex)
   const lines = Object.keys(lineTemp)
     .map(id => ~~id)
     .filter(
@@ -113,7 +114,7 @@ export default function textFunction(
   state: RouteState = initialState,
   lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED
 ): Route {
-  const words = text.split(' ')
+  const words = text.replace(/\s+$/g, '').split(' ')
   let next: NextPops = {
     stations: [2],
     lines: [2]
@@ -126,6 +127,7 @@ export default function textFunction(
       return shortestRoute(data.stations[startIndex], data.stations[endIndex])
     }
   }
+  const route: Route = new Route()
   // nextの初期化　最初は全ての可能性がある
   for (let i = 0, l = data.stations.length; i < l; ++i) {
     next.stations[i] = i
@@ -135,7 +137,6 @@ export default function textFunction(
   }
 
   let textRoute: TextRouteNode[] = [] // TextBoxのWord分割したもの　Wordに意味を与える
-  let route: Route = new Route()
   let sourceStation: Station | null = null
   let typeLast: RouteNodeType | null = null
   for (let i = 0; i < words.length; ++i) {
@@ -145,25 +146,12 @@ export default function textFunction(
     }
     let { type, stationId, lineId } = detectWordType(word, next, i === words.length - 1 ? lastNodeType : undefined)
     typeLast = type
-    if (sourceStation === null && type !== null) {
-      if (textRoute.length === 0) {
-        if (type === RouteNodeType.STATION) {
-          sourceStation = data.stations[stationId]
-        }
-      } else {
-        if (textRoute[0].type === RouteNodeType.LINE) {
-          sourceStation = data.stations[stationId]
-        } else if (type === RouteNodeType.STATION) {
-          textRoute[0].type = RouteNodeType.LINE
-          sourceStation = data.stations[stationId]
-        } else if (type === RouteNodeType.LINE || type === RouteNodeType.DUPLICATED) {
-          textRoute[0].type = RouteNodeType.STATION
-          sourceStation = data.stations[textRoute[0].value.id] // route[0].value で取れるのにinterfaceが邪魔
-        }
-      }
-      if (sourceStation !== null) {
-        route.stations[0] = sourceStation
-      }
+    if (type === null) {
+      break
+    }
+    if (sourceStation === null && type === RouteNodeType.STATION) {
+      sourceStation = data.stations[stationId]
+      route.stations[0] = sourceStation
     }
     if (type === RouteNodeType.STATION) {
       textRoute.push({
@@ -278,9 +266,5 @@ export default function textFunction(
     state.completionStation = next.stations.map(staId => data.stationNames[staId])
     state.lastInputHalfway = false
   }
-  state.source = sourceStation !== null ? sourceStation.name : ''
-  state.destination = route.stations.length > 1 ? route.stations[route.stations.length - 1].name : ''
-  state.route = route
-  state.text = words.join(' ')
-  return state
+  return route
 }

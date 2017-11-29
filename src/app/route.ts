@@ -27,8 +27,7 @@ export class RouteEdge {
     return this.startIndex > this.endIndex ? Direction.UP : Direction.DOWN
   }
   constructor() {
-    this.next.lines = []
-    this.next.stations = []
+    this.next = { lines: [], stations: [] }
   }
   fromStationId(startStationId: number, endStationId: number, lineId: number = -1): RouteEdge {
     this.start = data.stations[startStationId]
@@ -60,12 +59,13 @@ export class Route {
     this.unroutableEdges = []
     this.routedStations = {}
     if (text !== '') {
-      console.error('hoge')
       this.textFunction(text, lastNodeType)
     }
   }
   textFunction(text: string, lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
     const res = textFunction(text, undefined, lastNodeType)
+    this.edges = res.edges
+    this.stations = res.stations
   }
   ngStations(lineId: number, stationId: number): number[] {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?

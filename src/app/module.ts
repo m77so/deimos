@@ -1,6 +1,5 @@
 import { Action } from 'redux'
 import { Route, RouteEdge, RouteNodeType } from './route'
-import textFunction from './textFunction'
 import { fare, FareResponse } from './fare'
 export { RouteEdge }
 enum ActionNames {
@@ -55,24 +54,28 @@ export const initialState: RouteState = {
 }
 
 export default function reducer(state: RouteState = initialState, action: RouteActions): RouteState {
-  state.text = state.text.replace(/^\s+/g, '').replace(/\s+/g, ' ')
+  console.log(action)
+  let copyState = Object.assign({}, state)
   switch (action.type) {
     case ActionNames.NEXT:
-      state.text = state.lastInputHalfway
-        ? state.text
+      copyState.text = copyState.lastInputHalfway
+        ? copyState.text
             .split(' ')
             .slice(0, -1)
             .concat(action.text)
             .join(' ')
-        : state.text
-      state.route = new Route(state.text, action.line ? RouteNodeType.LINE : RouteNodeType.STATION)
-      state.fare = fare(state.route)
+        : copyState.text
+      copyState.route = new Route(copyState.text, action.line ? RouteNodeType.LINE : RouteNodeType.STATION)
+      copyState.fare = fare(copyState.route)
       break
     case ActionNames.TEXT:
-      state.route = new Route(action.text)
-      state.fare = fare(state.route)
+      copyState.text = action.text
+      .replace(/^\s+/g, '')
+      .replace(/\s+/g, ' ')
+      copyState.route = new Route(action.text)
+      copyState.fare = fare(copyState.route)
       break
     default:
   }
-  return state
+  return copyState
 }
