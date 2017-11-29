@@ -4,13 +4,8 @@ import textFunction, { NextPops } from './textFunction'
 export enum RouteNodeType {
   STATION,
   LINE,
-  DUPLICATED
-}
-export interface TextRouteNode {
-  type: RouteNodeType
-  value: Line | Station
-  line: Line | null
-  station: Station | null
+  DUPLICATED,
+  UNKNOWN
 }
 enum Direction {
   UP, // 上りを表す　キロ数が減る
@@ -59,13 +54,13 @@ export class Route {
     this.unroutableEdges = []
     this.routedStations = {}
     if (text !== '') {
-      this.textFunction(text, lastNodeType)
+      this.ttFunction(text, lastNodeType)
     }
   }
-  textFunction(text: string, lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
-    const res = textFunction(text, undefined, lastNodeType)
-    this.edges = res.edges
-    this.stations = res.stations
+  ttFunction(text: string = '', lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
+    const res = textFunction(text, this, lastNodeType)
+    this.edges =  res.edges
+    this.stations =  res.stations
   }
   ngStations(lineId: number, stationId: number): number[] {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?
