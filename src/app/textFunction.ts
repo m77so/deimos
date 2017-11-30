@@ -240,7 +240,11 @@ export default function textFunction(
     }
 
     // DUPは処理をしない
-    route.next(type === RouteNodeType.LINE, word)
+    if (type === RouteNodeType.LINE) {
+      route.nextLine(lineId)
+    } else {
+      route.nextStation(stationId)
+    }
   }
   return route
 }

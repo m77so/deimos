@@ -236,6 +236,20 @@ export class Route {
       lines: lines
     }
   }
+  generateText(text: string): string {
+    return this.textRoute
+      .map(n => {
+        if (n.nodeType === RouteNodeType.LINE) {
+          return n.value.name + '線'
+        } else if (n.nodeType === RouteNodeType.STATION) {
+          return n.value.name + '駅'
+        }
+        return ''
+      })
+      .join(' ')
+  }
+
+  /* NextAction */
   next(lineFlag: boolean, text: string) {
     // update textRoute
     let lastTextRoute = this.textRoute[this.textRoute.length - 1]
@@ -243,15 +257,26 @@ export class Route {
       this.textRoute.splice(-1, 1)
     }
     if (lineFlag) {
-      const lineId = data.lineNames.indexOf(text)
-      this.textRoute.push(new TextRouteNodeLine(data.lines[lineId], this.nextPopsLine(lineId)))
+      this.nextLine(data.lineNames.indexOf(text))
     } else {
-      const stationId = data.stationNames.indexOf(text)
-      this.textRoute.push(new TextRouteNodeStation(data.stations[stationId]))
+      this.nextStation(data.stationNames.indexOf(text))
     }
+  }
+  nextLine(lineId: number) {
+    this.textRoute.push(new TextRouteNodeLine(data.lines[lineId], this.nextPopsLine(lineId)))
+    this.updateEdge()
+  }
+  nextStation(stationId: number) {
+    this.textRoute.push(new TextRouteNodeStation(data.stations[stationId]))
+    this.updateEdge()
+  }
+  /*
+  * nextLine, nextStation からのみ実行する
+  */
+  private updateEdge() {
     // update Edge
+    
     const textRouteNode = this.textRoute[this.textRoute.length - 1]
-    console.log(textRouteNode)
     if (textRouteNode.nodeType === RouteNodeType.STATION) {
       this.stations.push(data.stations[textRouteNode.station.id])
       // 駅　路線　駅
@@ -271,8 +296,10 @@ export class Route {
           this.pushEdge(startStationId, endStationId)
         }
       }
-    } else if (textRouteNode.nodeType === RouteNodeType.LINE && this.stations.length >= 2) {
-      const textRouteMinus1 = this.textRoute[this.stations.length - 1]
+    } else if (textRouteNode.nodeType === RouteNodeType.LINE && this.textRoute.length >= 2) {
+      const textRouteMinus1 = this.textRoute[this.textRoute.length - 1]
+      console.log(textRouteMinus1)
+      console.log(textRouteNode.line.id)
       if (textRouteMinus1.nodeType === RouteNodeType.LINE) {
         // 駅　路線　路線
         const middleStationId = textRouteMinus1.nextFromLine.stations.filter(id =>
@@ -289,18 +316,8 @@ export class Route {
     if (textRouteNode.nodeType === RouteNodeType.STATION) {
       textRouteNode.nextFromStation = this.nextPopsStation(textRouteNode.station.id)
     }
+    console.log(this)
   }
 
-  generateText(text: string): string {
-    return this.textRoute
-      .map(n => {
-        if (n.nodeType === RouteNodeType.LINE) {
-          return n.value.name + '線'
-        } else if (n.nodeType === RouteNodeType.STATION) {
-          return n.value.name + '駅'
-        }
-        return ''
-      })
-      .join(' ')
-  }
+
 }
