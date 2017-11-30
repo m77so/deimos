@@ -240,7 +240,7 @@ export class Route {
     return this.textRoute
       .map(n => {
         if (n.nodeType === RouteNodeType.LINE) {
-          return n.value.name + '線'
+          return n.value.name + 'L'
         } else if (n.nodeType === RouteNodeType.STATION) {
           return n.value.name + '駅'
         }
