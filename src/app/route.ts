@@ -1,6 +1,6 @@
 import { Line, Station } from './dataInterface'
 import { data } from './data'
-import textFunction, { NextPops } from './textFunction'
+import textFunction, { NextPops, TextRouteNode } from './textFunction'
 export enum RouteNodeType {
   STATION,
   LINE,
@@ -42,25 +42,32 @@ export class RouteEdge {
     return this
   }
 }
+interface GetCompletionInterface {
+  line: string[]
+  station: string[]
+}
 
 export class Route {
   stations: Station[]
   edges: RouteEdge[]
   unroutableEdges: RouteEdge[]
   routedStations: { [key: number]: number } // stationId をKeyとしてもつ　6の字，9の字用
+  textRoute: TextRouteNode[]
   constructor(text: string = '', lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
     this.stations = []
     this.edges = []
     this.unroutableEdges = []
     this.routedStations = {}
+    this.textRoute = []
     if (text !== '') {
       this.ttFunction(text, lastNodeType)
     }
   }
   ttFunction(text: string = '', lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
     const res = textFunction(text, this, lastNodeType)
-    this.edges =  res.edges
-    this.stations =  res.stations
+    this.edges = res.edges
+    this.stations = res.stations
+    this.textRoute = res.textRoute
   }
   ngStations(lineId: number, stationId: number): number[] {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?
@@ -130,5 +137,52 @@ export class Route {
         }
       }
     }
+  }
+  getCompletion(): GetCompletionInterface {
+    if (this.textRoute.length === 0) {
+      return {
+        station: data.stationNames,
+        line: data.lineNames
+      }
+    }
+    const textRouteLastNode = this.textRoute[this.textRoute.length - 1]
+    console.log(textRouteLastNode)
+    const merge = (a: number[], b: number[]) => {
+      let temp = {}
+      for (let i of [...a, ...b]) {
+        temp[i] = 1
+      }
+      return Object.keys(temp).map(v => ~~v)
+    }
+
+    let completionStation: string[] = []
+    let completionLines: string[] = []
+
+    if (
+      textRouteLastNode.nodeType === RouteNodeType.DUPLICATED ||
+      textRouteLastNode.nodeType === RouteNodeType.UNKNOWN
+    ) {
+      completionLines = merge(textRouteLastNode.nextFromLine.lines, textRouteLastNode.nextFromStation.lines).map(
+        id => data.lineNames[id]
+      )
+      completionStation = merge(
+        textRouteLastNode.nextFromLine.stations,
+        textRouteLastNode.nextFromStation.stations
+      ).map(id => data.stationNames[id])
+    } else if (textRouteLastNode.nodeType === RouteNodeType.LINE) {
+      completionLines = textRouteLastNode.nextFromLine.lines.map(id => data.lineNames[id])
+      completionStation = textRouteLastNode.nextFromLine.stations.map(id => data.stationNames[id])
+    } else if (textRouteLastNode.nodeType === RouteNodeType.STATION) {
+      completionLines = textRouteLastNode.nextFromStation.lines.map(id => data.lineNames[id])
+      completionStation = textRouteLastNode.nextFromStation.stations.map(id => data.stationNames[id])
+    }
+    return {
+      station: completionStation,
+      line: completionLines
+    }
+  }
+  next(lineFlag: boolean, text: string) {
+    // let lastTextRoute = this.textRoute[this.textRoute.length - 1]
+    
   }
 }

@@ -1,5 +1,5 @@
 import { Action } from 'redux'
-import { Route, RouteEdge, RouteNodeType } from './route'
+import { Route, RouteEdge } from './route'
 import { fare, FareResponse } from './fare'
 export { RouteEdge }
 enum ActionNames {
@@ -58,14 +58,7 @@ export default function reducer(state: RouteState = initialState, action: RouteA
   let copyState = Object.assign({}, state)
   switch (action.type) {
     case ActionNames.NEXT:
-      copyState.text = copyState.lastInputHalfway
-        ? copyState.text
-            .split(' ')
-            .slice(0, -1)
-            .concat(action.text)
-            .join(' ')
-        : copyState.text
-      copyState.route = new Route(copyState.text, action.line ? RouteNodeType.LINE : RouteNodeType.STATION)
+      copyState.route.next(action.line,action.text)
       copyState.fare = fare(copyState.route)
       break
     case ActionNames.TEXT:
@@ -77,5 +70,8 @@ export default function reducer(state: RouteState = initialState, action: RouteA
       break
     default:
   }
+  const completions = copyState.route.getCompletion()
+  copyState.completionLine = completions.line
+  copyState.completionStation = completions.station
   return copyState
 }

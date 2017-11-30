@@ -63,6 +63,8 @@ class TextRouteNodeUnknown {
     this.text = text
     this.textType = RouteNodeType.UNKNOWN
     this.nodeType = RouteNodeType.UNKNOWN
+    this._nextFromLine = nullNextPops
+    this._nextFromStation = nullNextPops
     const match = this.text.match(/^[\u3040-\u309F]+/)
     this.prefix = match !== null ? new RegExp(`^${match[0]}`) : new RegExp(`^${pregQuote(this.text)}`)
   }
@@ -237,6 +239,7 @@ export default function textFunction(
   }
 
   let textRoute: TextRouteNode[] = [] // TextBoxのWord分割したもの　Wordに意味を与える
+  route.textRoute = textRoute
   for (let i = 0; i < words.length; ++i) {
     let word = words[i]
     if (word === '' || specialSuffix.indexOf(word) > -1) {
@@ -247,7 +250,7 @@ export default function textFunction(
     let stationId: number = -1
     let lineId: number = -1
     if (i === 0) {
-      ({ lastNodeType, type, stationId, lineId } = detectWordType(word, next, null))
+      ({ lastNodeType, type, stationId, lineId } = detectWordType(word, next, nullNextPops))
     } else {
       const lastTextRouteNode = textRoute[i - 1]
       switch (lastTextRouteNode.textType) {
@@ -274,6 +277,7 @@ export default function textFunction(
       const unknown = new TextRouteNodeUnknown(word)
       if (i === 0) {
         unknown.nextFromStation = next
+        unknown.nextFromLine = nullNextPops
       } else {
         unknown.setLastTextNode(textRoute[i - 1])
       }
