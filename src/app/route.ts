@@ -297,9 +297,7 @@ export class Route {
         }
       }
     } else if (textRouteNode.nodeType === RouteNodeType.LINE && this.textRoute.length >= 2) {
-      const textRouteMinus1 = this.textRoute[this.textRoute.length - 1]
-      console.log(textRouteMinus1)
-      console.log(textRouteNode.line.id)
+      const textRouteMinus1 = this.textRoute[this.textRoute.length - 2]
       if (textRouteMinus1.nodeType === RouteNodeType.LINE) {
         // 駅　路線　路線
         const middleStationId = textRouteMinus1.nextFromLine.stations.filter(id =>
