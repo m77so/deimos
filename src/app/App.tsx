@@ -77,6 +77,7 @@ class FareComponent extends React.Component<FareProps, {}> {
 }
 export class App extends React.Component<Props, {}> {
   render() {
+  
     return (
       <div>
         入力経路
@@ -104,7 +105,7 @@ export class App extends React.Component<Props, {}> {
         <div>
           ほかん
           <ul className="completion">
-            {this.props.value.completionLine.slice(0, 30).map(str => {
+            { this.props.value.completionLine.slice(0, 30).map(str => {
               return (
                 <li key={str + '線'} onClick={event => this.props.actions.setNextPop(true, str)}>
                   路線：{str}
