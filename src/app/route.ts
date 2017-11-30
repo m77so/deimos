@@ -239,7 +239,7 @@ export class Route {
   next(lineFlag: boolean, text: string) {
     // update textRoute
     let lastTextRoute = this.textRoute[this.textRoute.length - 1]
-    if (this.textRoute.length>0&&lastTextRoute.nodeType === RouteNodeType.UNKNOWN ) {
+    if (this.textRoute.length > 0 && lastTextRoute.nodeType === RouteNodeType.UNKNOWN) {
       this.textRoute.splice(-1, 1)
     }
     if (lineFlag) {
@@ -247,7 +247,7 @@ export class Route {
       this.textRoute.push(new TextRouteNodeLine(data.lines[lineId], this.nextPopsLine(lineId)))
     } else {
       const stationId = data.stationNames.indexOf(text)
-      this.textRoute.push(new TextRouteNodeStation(data.stations[stationId], this.nextPopsStation(stationId)))
+      this.textRoute.push(new TextRouteNodeStation(data.stations[stationId]))
     }
     // update Edge
     const textRouteNode = this.textRoute[this.textRoute.length - 1]
@@ -285,17 +285,22 @@ export class Route {
         this.pushEdge(startStationId, endStationId, line.id)
       }
     }
+    // 次候補　駅はEdge生成後にNG判定を行う
+    if (textRouteNode.nodeType === RouteNodeType.STATION) {
+      textRouteNode.nextFromStation = this.nextPopsStation(textRouteNode.station.id)
+    }
   }
 
-  generateText(text: string): string{
-    return this.textRoute.map((n)=>{
-      if(n.nodeType===RouteNodeType.LINE){
-        return n.value.name + '線'
-      }else if(n.nodeType===RouteNodeType.STATION){
-        return n.value.name + '駅'
-      }
-      return ''
-    }).join(' ')
+  generateText(text: string): string {
+    return this.textRoute
+      .map(n => {
+        if (n.nodeType === RouteNodeType.LINE) {
+          return n.value.name + '線'
+        } else if (n.nodeType === RouteNodeType.STATION) {
+          return n.value.name + '駅'
+        }
+        return ''
+      })
+      .join(' ')
   }
-  
 }
