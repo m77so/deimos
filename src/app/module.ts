@@ -59,6 +59,7 @@ export default function reducer(state: RouteState = initialState, action: RouteA
   switch (action.type) {
     case ActionNames.NEXT:
       copyState.route.next(action.line,action.text)
+      copyState.text = copyState.route.generateText('')
       copyState.fare = fare(copyState.route)
       break
     case ActionNames.TEXT:

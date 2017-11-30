@@ -1,6 +1,7 @@
 import { Line, Station } from './dataInterface'
 import { data } from './data'
-import textFunction, { NextPops, TextRouteNode } from './textFunction'
+import textFunction, { TextRouteNode, TextRouteNodeLine, TextRouteNodeStation } from './textFunction'
+import NextPops from './NextPops'
 export enum RouteNodeType {
   STATION,
   LINE,
@@ -53,6 +54,7 @@ export class Route {
   unroutableEdges: RouteEdge[]
   routedStations: { [key: number]: number } // stationId をKeyとしてもつ　6の字，9の字用
   textRoute: TextRouteNode[]
+
   constructor(text: string = '', lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
     this.stations = []
     this.edges = []
@@ -146,7 +148,6 @@ export class Route {
       }
     }
     const textRouteLastNode = this.textRoute[this.textRoute.length - 1]
-    console.log(textRouteLastNode)
     const merge = (a: number[], b: number[]) => {
       let temp = {}
       for (let i of [...a, ...b]) {
@@ -181,8 +182,120 @@ export class Route {
       line: completionLines
     }
   }
-  next(lineFlag: boolean, text: string) {
-    // let lastTextRoute = this.textRoute[this.textRoute.length - 1]
-    
+  nextPopsLine(lineIndex: number): NextPops {
+    const rail = data.lines[lineIndex]
+    if (rail === undefined) {
+      return new NextPops()
+    }
+    const srcStation = this.stations[this.stations.length - 1]
+    const ngStations = srcStation !== undefined ? this.ngStations(lineIndex, srcStation.id) : []
+    const stations = rail.stationIds.filter(id => !ngStations.includes(id))
+    let lineTemp: { [key: number]: number } = {}
+    rail.dupLineStationIds.filter(id => !ngStations.includes(id)).forEach(id =>
+      data.stations[id].lineIds.forEach(lineId => {
+        lineTemp[lineId] = lineTemp[lineId] === undefined ? 1 : lineTemp[lineId] + 1
+      })
+    )
+
+    const lines = Object.keys(lineTemp)
+      .map(id => ~~id)
+      .filter(
+        id =>
+          lineTemp[id] === 1 &&
+          id !== lineIndex &&
+          // 遷移先からまだ移動できること
+          (srcStation === undefined || this.ngStations(id, srcStation.id).length < data.lines[id].stationIds.length)
+      )
+    return new NextPops(stations, lines)
   }
+
+  nextPopsStation = (stationId: number): NextPops => {
+    let station = data.stations[stationId]
+    if (station === undefined) {
+      return new NextPops()
+    }
+    let stationTemp: { [key: number]: number[] } = {}
+    station.lineIds.forEach(lineId => {
+      const ngStations = this.ngStations(lineId, stationId)
+      data.lines[lineId].stationIds.forEach(st => {
+        if (ngStations.includes(st)) {
+          return
+        }
+        if (stationTemp[st] === undefined) {
+          stationTemp[st] = []
+        }
+        stationTemp[st].push(lineId)
+      })
+    })
+    const lines = station.lineIds.filter(
+      id => this.ngStations(id, station.id).length < data.lines[id].stationIds.length // 遷移先からまだ移動できること
+    )
+    const stations = Object.keys(stationTemp).map(id => ~~id)
+    return {
+      stations: stations,
+      lines: lines
+    }
+  }
+  next(lineFlag: boolean, text: string) {
+    // update textRoute
+    let lastTextRoute = this.textRoute[this.textRoute.length - 1]
+    if (this.textRoute.length>0&&lastTextRoute.nodeType === RouteNodeType.UNKNOWN ) {
+      this.textRoute.splice(-1, 1)
+    }
+    if (lineFlag) {
+      const lineId = data.lineNames.indexOf(text)
+      this.textRoute.push(new TextRouteNodeLine(data.lines[lineId], this.nextPopsLine(lineId)))
+    } else {
+      const stationId = data.stationNames.indexOf(text)
+      this.textRoute.push(new TextRouteNodeStation(data.stations[stationId], this.nextPopsStation(stationId)))
+    }
+    // update Edge
+    const textRouteNode = this.textRoute[this.textRoute.length - 1]
+    console.log(textRouteNode)
+    if (textRouteNode.nodeType === RouteNodeType.STATION) {
+      this.stations.push(data.stations[textRouteNode.station.id])
+      // 駅　路線　駅
+      // 駅　駅
+      if (this.stations.length >= 2) {
+        const textRouteMinus1 = this.textRoute[this.textRoute.length - 2]
+        if (textRouteMinus1.nodeType === RouteNodeType.LINE) {
+          // 駅　路線　駅　となる場合
+          const line = textRouteMinus1.line
+          const startStationId = this.stations[this.stations.length - 2].id
+          const endStationId = this.stations[this.stations.length - 1].id
+          this.pushEdge(startStationId, endStationId, line.id)
+        } else if (textRouteMinus1.nodeType === RouteNodeType.STATION) {
+          // 駅　駅　となる場合
+          const startStationId = this.stations[this.stations.length - 2].id
+          const endStationId = this.stations[this.stations.length - 1].id
+          this.pushEdge(startStationId, endStationId)
+        }
+      }
+    } else if (textRouteNode.nodeType === RouteNodeType.LINE && this.stations.length >= 2) {
+      const textRouteMinus1 = this.textRoute[this.stations.length - 1]
+      if (textRouteMinus1.nodeType === RouteNodeType.LINE) {
+        // 駅　路線　路線
+        const middleStationId = textRouteMinus1.nextFromLine.stations.filter(id =>
+          data.stations[id].lineIds.includes(textRouteNode.line.id)
+        )[0]
+        this.stations.push(data.stations[middleStationId])
+        const line = textRouteMinus1.line
+        const startStationId = this.stations[this.stations.length - 2].id
+        const endStationId = this.stations[this.stations.length - 1].id
+        this.pushEdge(startStationId, endStationId, line.id)
+      }
+    }
+  }
+
+  generateText(text: string): string{
+    return this.textRoute.map((n)=>{
+      if(n.nodeType===RouteNodeType.LINE){
+        return n.value.name + '線'
+      }else if(n.nodeType===RouteNodeType.STATION){
+        return n.value.name + '駅'
+      }
+      return ''
+    }).join(' ')
+  }
+  
 }

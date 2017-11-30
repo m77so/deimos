@@ -3,8 +3,9 @@ import { data } from './data'
 import { pregQuote } from './util'
 import { Route, RouteNodeType } from './route'
 import shortestRoute from './shortestRoute'
+import NextPops from './NextPops'
 
-class TextRouteNodeStation {
+export class TextRouteNodeStation {
   textType: RouteNodeType.STATION
   nodeType: RouteNodeType.STATION
   station: Station
@@ -18,8 +19,9 @@ class TextRouteNodeStation {
     this.textType = RouteNodeType.STATION
     this.nodeType = RouteNodeType.STATION
   }
+  
 }
-class TextRouteNodeLine {
+export class TextRouteNodeLine {
   textType: RouteNodeType.LINE
   nodeType: RouteNodeType.LINE
   line: Line
@@ -34,7 +36,7 @@ class TextRouteNodeLine {
     this.nodeType = RouteNodeType.LINE
   }
 }
-class TextRouteNodeDuplicate {
+export class TextRouteNodeDuplicate {
   textType: RouteNodeType.DUPLICATED // テキストとして評価される時はDUP
   nodeType: RouteNodeType // その後の評価で駅か路線か判断不能か
   line: Line
@@ -52,7 +54,7 @@ class TextRouteNodeDuplicate {
     this.nodeType = RouteNodeType.DUPLICATED
   }
 }
-class TextRouteNodeUnknown {
+export class TextRouteNodeUnknown {
   textType: RouteNodeType.UNKNOWN
   nodeType: RouteNodeType.UNKNOWN
   text: string
@@ -63,8 +65,8 @@ class TextRouteNodeUnknown {
     this.text = text
     this.textType = RouteNodeType.UNKNOWN
     this.nodeType = RouteNodeType.UNKNOWN
-    this._nextFromLine = nullNextPops
-    this._nextFromStation = nullNextPops
+    this._nextFromLine = new NextPops()
+    this._nextFromStation = new NextPops()
     const match = this.text.match(/^[\u3040-\u309F]+/)
     this.prefix = match !== null ? new RegExp(`^${match[0]}`) : new RegExp(`^${pregQuote(this.text)}`)
   }
@@ -102,18 +104,11 @@ class TextRouteNodeUnknown {
   }
 }
 export type TextRouteNode = TextRouteNodeDuplicate | TextRouteNodeLine | TextRouteNodeStation | TextRouteNodeUnknown
-export interface NextPops {
-  stations: number[]
-  lines: number[]
-}
-const nullNextPops: NextPops = {
-  stations: [],
-  lines: []
-}
+
 const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
   const rail = data.lines[lineIndex]
   if (rail === undefined) {
-    return nullNextPops
+    return new NextPops()
   }
   const srcStation = route.stations[route.stations.length - 1]
   const ngStations = srcStation !== undefined ? route.ngStations(lineIndex, srcStation.id) : []
@@ -138,7 +133,7 @@ const nextPopsLine = (lineIndex: number, route: Route): NextPops => {
 const nextPopsStation = (stationId: number, route: Route): NextPops => {
   let station = data.stations[stationId]
   if (station === undefined) {
-    return nullNextPops
+    return new NextPops()
   }
   let stationTemp: { [key: number]: number[] } = {}
   station.lineIds.forEach(lineId => {
@@ -173,6 +168,10 @@ const detectWordType = (
   nextFromStation: NextPops | null,
   nextFromLine: NextPops | null
 ): DetectWordTypeInterface => {
+  const suffix = word.slice(-1) || ''
+  if (specialSuffix.indexOf(suffix) > -1) {
+    word = word.slice(0, -1)
+  }
   const stationId = data.stationNames.indexOf(word)
   const lineId = data.lineNames.indexOf(word)
   let stationFlag = false
@@ -193,10 +192,6 @@ const detectWordType = (
     }
   })
 
-  const suffix = word.slice(-1) || ''
-  if (specialSuffix.indexOf(suffix) > -1) {
-    word = word.slice(0, -1)
-  }
   let type = stationFlag
     ? lineFlag ? RouteNodeType.DUPLICATED : RouteNodeType.STATION
     : lineFlag ? RouteNodeType.LINE : RouteNodeType.UNKNOWN
@@ -250,7 +245,7 @@ export default function textFunction(
     let stationId: number = -1
     let lineId: number = -1
     if (i === 0) {
-      ({ lastNodeType, type, stationId, lineId } = detectWordType(word, next, nullNextPops))
+      ({ lastNodeType, type, stationId, lineId } = detectWordType(word, next, new NextPops()))
     } else {
       const lastTextRouteNode = textRoute[i - 1]
       switch (lastTextRouteNode.textType) {
@@ -277,7 +272,7 @@ export default function textFunction(
       const unknown = new TextRouteNodeUnknown(word)
       if (i === 0) {
         unknown.nextFromStation = next
-        unknown.nextFromLine = nullNextPops
+        unknown.nextFromLine = new NextPops()
       } else {
         unknown.setLastTextNode(textRoute[i - 1])
       }
