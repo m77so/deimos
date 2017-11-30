@@ -144,7 +144,7 @@ export class Route {
     if (this.textRoute.length === 0) {
       return {
         station: data.stationNames,
-        line: data.lineNames
+        line: data.lineNames.filter(v=>v!=='')
       }
     }
     const textRouteLastNode = this.textRoute[this.textRoute.length - 1]
