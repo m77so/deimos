@@ -319,6 +319,5 @@ export class Route {
         textRouteNode.nextFromLine.lines = []
       }
     }
-    console.log(this)
   }
 }
