@@ -13,9 +13,9 @@ export class TextRouteNodeStation {
   get value() {
     return this.station
   }
-  constructor(station: Station, next: NextPops = new NextPops()) {
+  constructor(station: Station) {
     this.station = station
-    this.nextFromStation = next
+    this.nextFromStation = new NextPops()
     this.textType = RouteNodeType.STATION
     this.nodeType = RouteNodeType.STATION
   }
@@ -28,9 +28,9 @@ export class TextRouteNodeLine {
   get value() {
     return this.line
   }
-  constructor(line: Line, next: NextPops) {
+  constructor(line: Line) {
     this.line = line
-    this.nextFromLine = next
+    this.nextFromLine = new NextPops()
     this.textType = RouteNodeType.LINE
     this.nodeType = RouteNodeType.LINE
   }

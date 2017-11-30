@@ -144,7 +144,7 @@ export class Route {
     if (this.textRoute.length === 0) {
       return {
         station: data.stationNames,
-        line: data.lineNames.filter(v=>v!=='')
+        line: data.lineNames.filter(v => v !== '')
       }
     }
     const textRouteLastNode = this.textRoute[this.textRoute.length - 1]
@@ -263,7 +263,7 @@ export class Route {
     }
   }
   nextLine(lineId: number) {
-    this.textRoute.push(new TextRouteNodeLine(data.lines[lineId], this.nextPopsLine(lineId)))
+    this.textRoute.push(new TextRouteNodeLine(data.lines[lineId]))
     this.updateEdge()
   }
   nextStation(stationId: number) {
@@ -275,7 +275,7 @@ export class Route {
   */
   private updateEdge() {
     // update Edge
-    
+
     const textRouteNode = this.textRoute[this.textRoute.length - 1]
     if (textRouteNode.nodeType === RouteNodeType.STATION) {
       this.stations.push(data.stations[textRouteNode.station.id])
@@ -313,9 +313,12 @@ export class Route {
     // 次候補　駅はEdge生成後にNG判定を行う
     if (textRouteNode.nodeType === RouteNodeType.STATION) {
       textRouteNode.nextFromStation = this.nextPopsStation(textRouteNode.station.id)
+    } else if (textRouteNode.nodeType === RouteNodeType.LINE) {
+      textRouteNode.nextFromLine = this.nextPopsLine(textRouteNode.line.id)
+      if (this.stations.length === 0) {
+        textRouteNode.nextFromLine.lines = []
+      }
     }
     console.log(this)
   }
-
-
 }
