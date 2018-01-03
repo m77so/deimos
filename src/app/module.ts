@@ -1,5 +1,6 @@
 import { Action } from 'redux'
 import { Route } from './Route'
+import TextRoute from './TextRoute'
 import { fare, FareResponse } from './fare'
 enum ActionNames {
   TEXT = 'route/text',
@@ -64,7 +65,7 @@ export default function reducer(state: RouteState = initialState, action: RouteA
       copyState.text = action.text
       .replace(/^\s+/g, '')
       .replace(/\s+/g, ' ')
-      copyState.route = new Route(action.text)
+      copyState.route = new TextRoute(action.text)
       copyState.fare = fare(copyState.route)
       break
     default:

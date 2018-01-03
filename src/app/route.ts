@@ -1,14 +1,8 @@
 import { Station } from './dataInterface'
 import { data } from './data'
-import textFunction, { TextRouteNode, TextRouteNodeLine, TextRouteNodeStation } from './textFunction'
+import { TextRouteNode, TextRouteNodeLine, TextRouteNodeStation, RouteNodeType } from './TextRouteNode'
 import NextPops from './NextPops'
 import RouteEdge from './RouteEdge'
-export enum RouteNodeType {
-  STATION,
-  LINE,
-  DUPLICATED,
-  UNKNOWN
-}
 
 interface GetCompletionInterface {
   line: string[]
@@ -28,16 +22,8 @@ export class Route {
     this.unroutableEdges = []
     this.routedStations = {}
     this.textRoute = []
-    if (text !== '') {
-      this.ttFunction(text, lastNodeType)
-    }
   }
-  ttFunction(text: string = '', lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
-    const res = textFunction(text, this, lastNodeType)
-    this.edges = res.edges
-    this.stations = res.stations
-    this.textRoute = res.textRoute
-  }
+
   ngStations(lineId: number, stationId: number): number[] {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?
     // stationIdsで返します．
