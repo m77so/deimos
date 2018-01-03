@@ -1,7 +1,6 @@
 import { Action } from 'redux'
-import { Route, RouteEdge } from './route'
+import { Route } from './route'
 import { fare, FareResponse } from './fare'
-export { RouteEdge }
 enum ActionNames {
   TEXT = 'route/text',
   NEXT = 'route/next'
@@ -54,11 +53,9 @@ export const initialState: RouteState = {
 }
 
 export default function reducer(state: RouteState = initialState, action: RouteActions): RouteState {
-  console.log(state.route,action)
   let copyState = Object.assign({}, state)
   switch (action.type) {
     case ActionNames.NEXT:
-      console.log(copyState.route.edges.length)
       copyState.route.next(action.line,action.text)
       copyState.text = copyState.route.generateText('')
       copyState.fare = fare(copyState.route)
