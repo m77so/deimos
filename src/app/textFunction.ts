@@ -1,7 +1,7 @@
 import { Station, Line } from './dataInterface'
 import { data } from './data'
 import { pregQuote } from './util'
-import { Route, RouteNodeType } from './route'
+import { Route, RouteNodeType } from './Route'
 import shortestRoute from './shortestRoute'
 import NextPops from './NextPops'
 
@@ -192,18 +192,18 @@ export default function textFunction(
     let stationId: number = -1
     let lineId: number = -1
     if (i === 0) {
-      ;({ lastNodeType, type, stationId, lineId } = detectWordType(word, next, new NextPops()))
+      ({ lastNodeType, type, stationId, lineId } = detectWordType(word, next, new NextPops()))
     } else {
       const lastTextRouteNode = textRoute[i - 1]
       switch (lastTextRouteNode.textType) {
         case RouteNodeType.STATION:
-          ;({ lastNodeType, type, stationId, lineId } = detectWordType(word, lastTextRouteNode.nextFromStation, null))
+          ({ lastNodeType, type, stationId, lineId } = detectWordType(word, lastTextRouteNode.nextFromStation, null))
           break
         case RouteNodeType.LINE:
-          ;({ lastNodeType, type, stationId, lineId } = detectWordType(word, null, lastTextRouteNode.nextFromLine))
+          ({ lastNodeType, type, stationId, lineId } = detectWordType(word, null, lastTextRouteNode.nextFromLine))
           break
         case RouteNodeType.DUPLICATED:
-          ;({ lastNodeType, type, stationId, lineId } = detectWordType(
+          ({ lastNodeType, type, stationId, lineId } = detectWordType(
             word,
             lastTextRouteNode.nextFromStation,
             lastTextRouteNode.nextFromLine

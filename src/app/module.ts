@@ -1,5 +1,5 @@
 import { Action } from 'redux'
-import { Route } from './route'
+import { Route } from './Route'
 import { fare, FareResponse } from './fare'
 enum ActionNames {
   TEXT = 'route/text',

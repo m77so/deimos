@@ -1,7 +1,7 @@
 
 import { Station } from './dataInterface'
 import { data } from './data'
-import { Route } from './route'
+import { Route } from './Route'
 /*
 * 最安経路を導出する
 * 大都市近郊区間用

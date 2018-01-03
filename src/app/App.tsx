@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteState } from './module'
 import RouteEdge from './RouteEdge'
 import { ActionDispatcher } from './Container'
-import { Route } from './route'
+import { Route } from './Route'
 import { calcType, FareResponse } from './fare'
 import './App.css'
 
