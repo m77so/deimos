@@ -1,6 +1,6 @@
 import * as shortestRoute from './shortestRoute'
 import { data } from './data'
-import { Route } from './route'
+import { Route } from './Route'
 const testFunction = (start: string, end: string): Route => {
   const startStation = data.stations[data.stationNames.indexOf(start)]
   const endStation = data.stations[data.stationNames.indexOf(end)]

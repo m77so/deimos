@@ -1,48 +1,9 @@
-import { Line, Station } from './dataInterface'
+import { Station } from './dataInterface'
 import { data } from './data'
-import textFunction, { TextRouteNode, TextRouteNodeLine, TextRouteNodeStation } from './textFunction'
+import { TextRouteNode, TextRouteNodeLine, TextRouteNodeStation, RouteNodeType } from './TextRouteNode'
 import NextPops from './NextPops'
-export enum RouteNodeType {
-  STATION,
-  LINE,
-  DUPLICATED,
-  UNKNOWN
-}
-enum Direction {
-  UP, // 上りを表す　キロ数が減る
-  DOWN
-}
-export class RouteEdge {
-  line: Line
-  startIndex: number
-  endIndex: number
-  start: Station
-  end: Station
-  next: NextPops
-  get direction(): Direction {
-    return this.startIndex > this.endIndex ? Direction.UP : Direction.DOWN
-  }
-  constructor() {
-    this.next = { lines: [], stations: [] }
-  }
-  fromStationId(startStationId: number, endStationId: number, lineId: number = -1): RouteEdge {
-    this.start = data.stations[startStationId]
-    this.end = data.stations[endStationId]
-    lineId = lineId === -1 ? this.start.lineIds.filter(id => this.end.lineIds.includes(id))[0] : lineId
-    this.line = data.lines[lineId]
-    this.startIndex = this.line.stationIds.indexOf(startStationId)
-    this.endIndex = this.line.stationIds.indexOf(endStationId)
-    return this
-  }
-  fromLineIndex(startStationIndex: number, endStationIndex: number, lineId: number): RouteEdge {
-    this.startIndex = startStationIndex
-    this.endIndex = endStationIndex
-    this.line = data.lines[lineId]
-    this.start = data.stations[this.line.stationIds[this.startIndex]]
-    this.end = data.stations[this.line.stationIds[this.endIndex]]
-    return this
-  }
-}
+import RouteEdge from './RouteEdge'
+
 interface GetCompletionInterface {
   line: string[]
   station: string[]
@@ -61,16 +22,8 @@ export class Route {
     this.unroutableEdges = []
     this.routedStations = {}
     this.textRoute = []
-    if (text !== '') {
-      this.ttFunction(text, lastNodeType)
-    }
   }
-  ttFunction(text: string = '', lastNodeType: RouteNodeType = RouteNodeType.DUPLICATED) {
-    const res = textFunction(text, this, lastNodeType)
-    this.edges = res.edges
-    this.stations = res.stations
-    this.textRoute = res.textRoute
-  }
+
   ngStations(lineId: number, stationId: number): number[] {
     // 路線(lineId)をstationId駅を起点として利用するときに，乗車済みでその路線で直接行けない駅はどれ?
     // stationIdsで返します．

@@ -1,5 +1,5 @@
 import { Companies } from './dataInterface'
-import { Route } from './route'
+import { Route } from './Route'
 export class FareResponse {
   fare: number
   km: number
