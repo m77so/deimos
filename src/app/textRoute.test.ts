@@ -9,8 +9,8 @@ it('駅　路線　路線　駅', () => {
   expect(res.edges.length).toBe(2)
   expect(res.edges.map(edge => edge.line.name).join('')).toBe('北陸北陸新幹線')
 })
-// it('重複路線　駅　路線　駅', () => {
-//   const res = textFunction.default('小浜 青郷 小浜 西敦賀')
-//   expect(res.edges.length).toBe(1)
-//   expect(res.edges.map(edge => edge.line.name).join('')).toBe('小浜')
-// })
+it('路線　駅　駅', () => {
+  const res  = new TextRoute('北陸 米原 岐阜')
+  expect(res.edges.length).toBe(1)
+  expect(res.edges.map(edge => edge.line.name).join('')).toBe('東海道')
+})
